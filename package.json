@@ -1,0 +1,33 @@
+{
+  "name": "clarifi",
+  "version": "1.0.0",
+  "description": "FPGA and software crossover to bring your microphone clarity and fidelity",
+  "main": "index.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=development electron index.js",
+    "startp": "cross-env NODE_ENV=production electron index.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nipunaw/ClariFi.git"
+  },
+  "author": "Nipuna",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nipunaw/ClariFi/issues"
+  },
+  "homepage": "https://github.com/nipunaw/ClariFi#readme",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^16.0.0",
+    "electron-builder": "^22.13.1"
+  },
+  "build": {
+        "appId": "com.electron.clarifi",
+        "mac": {
+          "category": "public.app-category.utilities"
+        }
+  }
+}
