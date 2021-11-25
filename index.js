@@ -1,110 +1,57 @@
-"use strict";
-
-const isOSX = process.platform === 'darwin';
-const isDevMode = process.env.NODE_ENV === 'development';
-
 const electron = require('electron');
-const webContents = electron.webContents;
+const url = require('url');
 const path = require('path');
-const fs = require('fs');
 
-const app = electron.app;
-const BrowserWindow = electron.BrowserWindow;
-let mainWindow = null;
-let mainWebContents = null;
+const {app, BrowserWindow, Menu} = electron;
 
-function createWindow() {
-  const {width: screenWidth, height: screenHeight} = electron.screen.getPrimaryDisplay().workAreaSize;
-  const space = 50;
-  const x = space;
-  const y = space;
-  const width = screenWidth - space * 2;
-  const height = screenHeight - space * 2;
+let mainWindow;
 
-  mainWindow = new BrowserWindow({
-    defaultEncoding: "utf8",
-    // setting to true doesn't work in Windows
-    // https://github.com/electron/electron/issues/6036
-    // fullscreen: false,
-    fullscreenable: true,
-    defaultEncoding: "utf8",
-    x: x,
-    y: y,
-    width: width,
-    height: height,
-  });
+app.on('ready', function() { //Wait for app to be ready
+	mainWindow = new BrowserWindow({}); //Create browser window
+	mainWindow.loadURL(url.format({  //Load HTML
+		pathname: path.join(__dirname, 'src/index.html'),
+		protocol: 'file:',
+		slashes: true
+	}));
+	mainWindow.on('closed', function() { // Main window quitting = global quitting
+		app.quit();
+	});
+	const mainMenu = Menu.buildFromTemplate(mainMenuTemplate); //Set menu
+	Menu.setApplicationMenu(mainMenu);
+});
 
-  mainWindow.loadURL(`file://${__dirname}/src/index.html`);
-  if (isDevMode) {
-    mainWindow.webContents.openDevTools();
-  }
 
-  // open links in browser
-  mainWebContents = mainWindow.webContents;
-  const handleRedirect = (e, url) => {
-    if(url != mainWebContents.getURL()) {
-      e.preventDefault();
-      electron.shell.openExternal(url);
-    }
-  };
+//Main Menu Template
+const mainMenuTemplate = [
+	{
+		label: 'File',
+		submenu: [
+			{label: 'Quit', accelerator: process.platform == 'darwin' ? 'Command+Q' : 'CTRL+Q', click(){app.quit();}}
+		]
+	}
 
-  mainWebContents.on('will-navigate', handleRedirect);
-  mainWebContents.on('new-window', handleRedirect);
-  mainWebContents.on('dom-ready', () => {
-    if (!isDevMode) {
-      mainWindow.setFullScreen(true);
-    }
-  });
+];
+
+//Mac device specific
+if (process.platform == 'darwin') {
+	mainMenuTemplate.unshift({});
 }
 
-app.on('ready', () => {
-  setupMenus();
-  createWindow();
-});
-
-app.on('window-all-closed', () => {
-  mainWebContents = null;
-});
-
-function setupMenus() {
-  const menuTemplate = [
-    {
-      label: 'View',
-      submenu: [
-        {
-          label: 'Toggle Developer Tools',
-          accelerator: isOSX ? 'Alt+Command+I' : 'Ctrl+Shift+I',
-          click(item, focusedWindow) {
-            if (focusedWindow)
-              focusedWindow.webContents.toggleDevTools();
-          }
-        },
-      ]
-    },
-  ];
-
-
-  if (isOSX) {
-    const name = electron.app.getName();
-    menuTemplate.unshift({
-      label: name,
-      submenu: [
-        {
-          label: 'About ' + name,
-          role: 'about'
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Quit',
-          accelerator: 'Command+Q',
-          click() { app.quit(); }
-        },
-      ]
-    });
-  }
-
-  const menu = electron.Menu.buildFromTemplate(menuTemplate);
-  electron.Menu.setApplicationMenu(menu);
+// Add developer tools item if not in production
+if(process.env.NODE_ENV !== 'production'){
+  mainMenuTemplate.push({
+    label: 'Developer Tools',
+    submenu:[
+      {
+        role: 'reload'
+      },
+      {
+        label: 'Toggle Dev Tools',
+        accelerator:process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I',
+        click(item, focusedWindow){
+          focusedWindow.toggleDevTools();
+        }
+      }
+    ]
+  });
 }
