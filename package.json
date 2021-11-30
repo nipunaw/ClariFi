@@ -48,7 +48,6 @@
   "bugs": {
     "url": "https://github.com/nipunaw/ClariFi/issues"
   },
-  "homepage": "https://github.com/nipunaw/ClariFi#readme",
   "devDependencies": {
     "electron": "^16.0.2",
     "electron-builder": "^22.14.5"
