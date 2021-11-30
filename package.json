@@ -2,7 +2,7 @@
   "name": "clarifi",
   "version": "1.0.0",
   "description": "FPGA and software crossover to bring your microphone clarity and fidelity",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/nipunaw/ClariFi#readme",
   "devDependencies": {
-    "electron": "^16.0.2",
+    "electron": "^15.3.2",
     "electron-builder": "^22.14.5"
   },
   "build": {
