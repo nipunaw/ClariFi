@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Menu } = require("electron");
+const fs = require("fs");
 
 function createWindow() {
   // Create the browser window.
@@ -18,6 +19,23 @@ function createWindow() {
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate); //Set menu
   Menu.setApplicationMenu(mainMenu);
+  
+  readFile('C:\\Users\\nipun\\Desktop\\Golden Rules.txt','utf8')
+}
+
+function readFile(filepath, mimeType){
+   pathToFile = filepath.replace("file:\\\\",'');
+   pathToFile = pathToFile.replace(/\\/,'\\\\')
+
+
+   fs.readFile(filepath, mimeType, (err, data) => {
+        if(err){
+            alert("An error ocurred reading the file :" + err.message);
+            return;
+        }
+        // Change how to handle the file content
+        console.log("The file content is : " + data);
+    });
 }
 
 // This method will be called when Electron has finished
