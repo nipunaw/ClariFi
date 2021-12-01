@@ -22,7 +22,11 @@ function createWindow() {
   Menu.setApplicationMenu(mainMenu);
   
   //readFile('test.wav','base64');
-  analyzeAudio('test.wav');
+  //recordAudio('output.wav', analyzeAudio);
+  //recordAudio('output.wav');
+  //analyzeAudio('output.wav');
+  
+  recordAnalyzeAudio('output.wav');
   
 }
 
@@ -49,12 +53,57 @@ function analyzeAudio(file_name) {
 		args: [file_name]
 	};
 	
-	PythonShell.run('script.py', options,  function(err, results)  {
+	PythonShell.run('analyze.py', options,  function(err, results)  {
 		if (err) throw err;
-		console.log('script.py finished.');
-		console.log('results', results);
+		console.log('Script finished.');
+		for (let i = 0; i < results.length; i++) {
+			if (results[i].length < 35) {
+				console.log('Pitch Measurement:', results[i]);
+			}
+		}
+		
 	});
 }
+
+//Enlists Python to record microphone input
+function recordAudio(file_name, callback) {
+	let options = {
+		mode: 'text',
+		args: [file_name]
+	};
+	
+	PythonShell.run('record.py', options,  function(err, results)  {
+		if (err) throw err;
+		console.log('Recording finished.');
+		for (let i = 0; i < results.length; i++) {
+			console.log(results[i]);
+		}
+		
+	});
+	
+	callback(file_name);
+}
+
+//Record and analyze
+function recordAnalyzeAudio(file_name) {
+	let options = {
+		mode: 'text',
+		args: [file_name]
+	};
+	
+	PythonShell.run('master.py', options,  function(err, results)  {
+		if (err) throw err;
+		console.log('Master Script Finished.');
+		for (let i = 0; i < results.length; i++) {
+			if (results[i].length < 35) {
+				console.log(results[i]);
+			}
+		}
+		
+	});
+	
+}
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
