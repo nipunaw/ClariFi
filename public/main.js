@@ -20,7 +20,11 @@ function createWindow() {
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate); //Set menu
   Menu.setApplicationMenu(mainMenu);
   
-  readFile('C:\\Users\\nipun\\Desktop\\Golden Rules.txt','utf8')
+  //readFile('C:\\Users\\nipun\\Desktop\\test.mp3','base64');
+  var python = require('child_process').spawn('python', ['./script.py']);
+  python.stdout.on('data',function(data){
+		console.log("data: ",data.toString('utf8'));
+  });
 }
 
 function readFile(filepath, mimeType){
@@ -36,6 +40,19 @@ function readFile(filepath, mimeType){
         // Change how to handle the file content
         console.log("The file content is : " + data);
     });
+	
+}
+
+function analyzeAudio(audio) {	
+	context = new AudioContext();
+	analyser = context.createAnalyser();
+    source = context.createMediaElementSource(audio);
+    
+    var listen = context.createGain();
+
+    siyrce.connect(listen);
+    listen.connect(analyser);
+    analyser.connect(context.destination);
 }
 
 // This method will be called when Electron has finished
