@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Menu } = require("electron");
 const fs = require("fs");
+const {PythonShell} = require('python-shell');
 
 function createWindow() {
   // Create the browser window.
@@ -20,17 +21,15 @@ function createWindow() {
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate); //Set menu
   Menu.setApplicationMenu(mainMenu);
   
-  //readFile('C:\\Users\\nipun\\Desktop\\test.mp3','base64');
-  var python = require('child_process').spawn('python', ['./script.py']);
-  python.stdout.on('data',function(data){
-		console.log("data: ",data.toString('utf8'));
-  });
+  //readFile('test.wav','base64');
+  analyzeAudio('test.wav');
+  
 }
 
+//Helps you read file contents
 function readFile(filepath, mimeType){
    pathToFile = filepath.replace("file:\\\\",'');
    pathToFile = pathToFile.replace(/\\/,'\\\\')
-
 
    fs.readFile(filepath, mimeType, (err, data) => {
         if(err){
@@ -43,16 +42,18 @@ function readFile(filepath, mimeType){
 	
 }
 
-function analyzeAudio(audio) {	
-	context = new AudioContext();
-	analyser = context.createAnalyser();
-    source = context.createMediaElementSource(audio);
-    
-    var listen = context.createGain();
-
-    siyrce.connect(listen);
-    listen.connect(analyser);
-    analyser.connect(context.destination);
+//Enlists Python to analyze audio data
+function analyzeAudio(file_name) {
+	let options = {
+		mode: 'text',
+		args: [file_name]
+	};
+	
+	PythonShell.run('script.py', options,  function(err, results)  {
+		if (err) throw err;
+		console.log('script.py finished.');
+		console.log('results', results);
+	});
 }
 
 // This method will be called when Electron has finished
