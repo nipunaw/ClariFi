@@ -5,7 +5,7 @@ import "../css/MainContent.css";
 function MainContent(props) {
   const defaultMessages = {
     mainMessage: "Recording Audio Stage",
-    secondMessage: "Press the button below to record 10 seconds...",
+    secondMessage: "Press the button below to record 5 seconds...",
   };
   const [buttonMessage, setButtonMessage] = useState("Record");
   const [isRecordingFinished, setRecordingStatus] = useState(false);

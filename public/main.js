@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
+const { resolve } = require("path");
 const { PythonShell } = require("python-shell");
 
 function createWindow() {
@@ -105,10 +106,8 @@ async function recordAnalyzeAudio(file_name) {
     args: [file_name],
   };
 
-  await PythonShell.run(
-    "master.py",
-    options,
-    await function (err, results) {
+  let { success } = await new Promoise((resovle, reject) => {
+    PythonShell.run("master.py", options, function (err, results) {
       if (err) throw err;
       console.log("Master Script Finished.");
       for (let i = 0; i < results.length; i++) {
@@ -116,8 +115,11 @@ async function recordAnalyzeAudio(file_name) {
           console.log(results[i]);
         }
       }
-    }
-  );
+      resolve({ success: true });
+    });
+  });
+
+  console.log(success);
 }
 
 //Helper function that parses CSV into array. Need to get a NodeJS library I believe
