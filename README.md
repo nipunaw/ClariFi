@@ -5,6 +5,7 @@ FPGA and software crossover to bring your microphone clarity and fidelity
 Dependencies:
 
 [Python 3.9.1]
+
 - pip install tensorflow
 - pip install crepe
 - pip install sounddevice
@@ -14,8 +15,11 @@ Dependencies:
 Steps to run:
 
 - npm install
+- npm install -g http-server
+- Go to ClariFi/
+- http-server ./
 - npm start (Run React Server)
-- npm run electron-dev (Run React Application)
+- npm run electron-dev (Run Electron Application)
 
 Current development is done on Windows and the main target platform is Windows. This application is built using ElectronJS and ReactJS
 

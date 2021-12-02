@@ -3,11 +3,14 @@ import Button from "react-bootstrap/Button";
 import "../css/MainContent.css";
 
 function MainContent(props) {
-  let mainMessage = "Recording Audio Stage";
-  let secondMessage = "Press the button below to record...";
+  const defaultMessages = {
+    mainMessage: "Recording Audio Stage",
+    secondMessage: "Press the button below to record 10 seconds...",
+  };
   const [buttonMessage, setButtonMessage] = useState("Record");
   const [isRecordingFinished, setRecordingStatus] = useState(false);
   const [recordingData, setRecordingData] = useState(null);
+  const [displayMessages, setDisplayMessages] = useState(defaultMessages);
 
   const getImage = (imageInfo) => {
     /*
@@ -33,11 +36,11 @@ function MainContent(props) {
   };
 
   const displayRecordingResults = (recordingData) => {
-    let headerLabel = <h2>Image Recieved: </h2>;
+    let headerLabel = <h2>Magnitude Frequency Response: </h2>;
     let image = getImage(recordingData.imageInfo);
 
     return (
-      <div className="mt-3">
+      <div className="mt-5">
         {headerLabel}
         {image}
       </div>
@@ -60,14 +63,18 @@ function MainContent(props) {
         };
         setRecordingData(recievedData);
         setRecordingStatus(true);
+        setDisplayMessages({
+          ...displayMessages,
+          secondMessage: "Audio recording saved to " + message.IMG_PATH,
+        });
       }
     });
   }, []);
 
   return (
     <div className="row">
-      <h1>{mainMessage}</h1>
-      <h2>{secondMessage}</h2>
+      <h1>{displayMessages.mainMessage}</h1>
+      <h2>{displayMessages.secondMessage}</h2>
 
       <div className="mt-3">
         <Button
@@ -75,6 +82,7 @@ function MainContent(props) {
           variant="primary"
           style={{ width: "100%" }}
           onClick={clickHandler}
+          disabled={isRecordingFinished ? true : false}
         >
           {buttonMessage}
         </Button>
