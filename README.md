@@ -2,6 +2,15 @@
 
 FPGA and software crossover to bring your microphone clarity and fidelity
 
+Dependencies:
+
+[Python 3.9.1]
+- pip install tensorflow
+- pip install crepe
+- pip install sounddevice
+
+[Node.js 16.13.1]
+
 Steps to run:
 
 - npm install
