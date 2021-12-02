@@ -1,4 +1,6 @@
 const { app, BrowserWindow, Menu } = require("electron");
+const fs = require("fs");
+const {PythonShell} = require('python-shell');
 
 function createWindow() {
   // Create the browser window.
@@ -18,7 +20,100 @@ function createWindow() {
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate); //Set menu
   Menu.setApplicationMenu(mainMenu);
+  
+  //readFile('test.wav','base64');
+  //recordAudio('output.wav', analyzeAudio);
+  //recordAudio('output.wav');
+  //analyzeAudio('output.wav');
+  
+  recordAnalyzeAudio('output.wav');
+  //Creates output.wav
+  //Creates output.f0.csv -- Take data from columns and average for metadata
+  //Creates output.activation.png -- Plot this in react
+  
+  // TODO: Fill in parseCSV function below
 }
+
+//Helps you read file contents
+function readFile(filepath, mimeType){
+   pathToFile = filepath.replace("file:\\\\",'');
+   pathToFile = pathToFile.replace(/\\/,'\\\\')
+
+   fs.readFile(filepath, mimeType, (err, data) => {
+        if(err){
+            alert("An error ocurred reading the file :" + err.message);
+            return;
+        }
+        // Change how to handle the file content
+        console.log("The file content is : " + data);
+    });
+	
+}
+
+//Enlists Python to analyze audio data
+function analyzeAudio(file_name) {
+	let options = {
+		mode: 'text',
+		pythonOptions: ['-u'],
+		args: [file_name]
+	};
+	
+	PythonShell.run('analyze.py', options,  function(err, results)  {
+		if (err) throw err;
+		console.log('Script finished.');
+		for (let i = 0; i < results.length; i++) {
+			if (results[i].length < 35) {
+				console.log('Pitch Measurement:', results[i]);
+			}
+		}
+		
+	});
+}
+
+//Enlists Python to record microphone input
+function recordAudio(file_name, callback) {
+	let options = {
+		mode: 'text',
+		args: [file_name]
+	};
+	
+	PythonShell.run('record.py', options,  function(err, results)  {
+		if (err) throw err;
+		console.log('Recording finished.');
+		for (let i = 0; i < results.length; i++) {
+			console.log(results[i]);
+		}
+		
+	});
+	
+	callback(file_name);
+}
+
+//Record and analyze
+function recordAnalyzeAudio(file_name) {
+	let options = {
+		mode: 'text',
+		args: [file_name]
+	};
+	
+	PythonShell.run('master.py', options,  function(err, results)  {
+		if (err) throw err;
+		console.log('Master Script Finished.');
+		for (let i = 0; i < results.length; i++) {
+			if (results[i].length < 35) {
+				console.log(results[i]);
+			}
+		}
+		
+	});
+	
+}
+
+//Helper function that parses CSV into array. Need to get a NodeJS library I believe
+function parseCSV(filename, delimiter = ",") {
+  return;
+}
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
