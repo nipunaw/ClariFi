@@ -36,8 +36,13 @@ function createWindow() {
 
   ipcMain.on("recordButton", () => {
     console.log("heyo!");
-    recordAnalyzeAudio("output.wav");
-    win.webContents.send("recordMain", { STATUS: "finished" });
+    //recordAnalyzeAudio("output.wav");
+    let imagePath = "output.activation.png";
+    win.webContents.send("recordMain", {
+      STATUS: "finished",
+      IMG_PATH: imagePath,
+      IMG_ALT: "Output graph from analysis",
+    });
   });
 }
 

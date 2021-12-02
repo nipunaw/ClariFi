@@ -4,3 +4,7 @@
   color: var(--white-color);
   min-height: 100%;
 }
+
+.img-display {
+  max-width: 50%;
+}
