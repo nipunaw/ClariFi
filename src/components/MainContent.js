@@ -1,15 +1,23 @@
-import React from "react";
+import { React, useState } from "react";
 import Button from "react-bootstrap/Button";
 import "../css/MainContent.css";
 
 function MainContent(props) {
   let mainMessage = "Recording Audio Stage";
   let secondMessage = "Press the button below to record...";
-  let buttonMessage = "Record";
+  const [buttonMessage, setButtonMessage] = useState("Record");
 
   const clickHandler = (event) => {
+    setButtonMessage("Recording...");
     window.ipcRenderer.send("recordButton");
   };
+
+  window.ipcRenderer.on("recordMain", function (evt, message) {
+    console.log(message);
+    if (message.STATUS === "finished") {
+      setButtonMessage("Finished!");
+    }
+  });
 
   return (
     <div className="row">

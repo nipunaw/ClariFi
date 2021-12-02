@@ -33,12 +33,13 @@ function createWindow() {
   //Creates output.activation.png -- Plot this in react
 
   // TODO: Fill in parseCSV function below
-}
 
-ipcMain.on("recordButton", () => {
-  console.log("heyo!");
-  recordAnalyzeAudio("output.wav");
-});
+  ipcMain.on("recordButton", () => {
+    console.log("heyo!");
+    recordAnalyzeAudio("output.wav");
+    win.webContents.send("recordMain", { STATUS: "finished" });
+  });
+}
 
 //Helps you read file contents
 function readFile(filepath, mimeType) {
