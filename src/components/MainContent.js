@@ -11,6 +11,7 @@ function MainContent(props) {
   const [isRecordingFinished, setRecordingStatus] = useState(false);
   const [recordingData, setRecordingData] = useState(null);
   const [displayMessages, setDisplayMessages] = useState(defaultMessages);
+  const [displayResult, setDisplayResult] = useState(null);
 
   const getImage = (imageInfo) => {
     /*
@@ -36,6 +37,9 @@ function MainContent(props) {
   };
 
   const displayRecordingResults = (recordingData) => {
+    if (!recordingData) {
+      return null;
+    }
     let headerLabel = <h2>Magnitude Frequency Response: </h2>;
     let image = getImage(recordingData.imageInfo);
 
@@ -71,6 +75,11 @@ function MainContent(props) {
     });
   }, []);
 
+  useEffect(() => {
+    let result = displayRecordingResults(recordingData);
+    setDisplayResult(result);
+  }, [isRecordingFinished]);
+
   return (
     <div className="row">
       <h1>{displayMessages.mainMessage}</h1>
@@ -86,9 +95,7 @@ function MainContent(props) {
         >
           {buttonMessage}
         </Button>
-        <h2>
-          {isRecordingFinished ? displayRecordingResults(recordingData) : null}
-        </h2>
+        <h2>{isRecordingFinished ? displayResult : null}</h2>
       </div>
     </div>
   );
