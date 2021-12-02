@@ -9,6 +9,8 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
+      preload: __dirname + "/preload.js",
     },
   });
 
@@ -16,7 +18,7 @@ function createWindow() {
   win.loadURL("http://localhost:3000");
 
   // Open the DevTools.
-  win.webContents.openDevTools();
+  //win.webContents.openDevTools();
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate); //Set menu
   Menu.setApplicationMenu(mainMenu);
@@ -26,13 +28,17 @@ function createWindow() {
   //recordAudio('output.wav');
   //analyzeAudio('output.wav');
 
-  recordAnalyzeAudio("output.wav");
   //Creates output.wav
   //Creates output.f0.csv -- Take data from columns and average for metadata
   //Creates output.activation.png -- Plot this in react
 
   // TODO: Fill in parseCSV function below
 }
+
+ipcMain.on("recordButton", () => {
+  console.log("heyo!");
+  recordAnalyzeAudio("output.wav");
+});
 
 //Helps you read file contents
 function readFile(filepath, mimeType) {
@@ -150,8 +156,6 @@ const mainMenuTemplate = [
     ],
   },
 ];
-
-ipcMain.on("recordButton", () => console.log("heyo!"));
 
 //Mac device specific
 if (process.platform == "darwin") {

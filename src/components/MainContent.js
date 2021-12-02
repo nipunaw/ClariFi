@@ -1,8 +1,6 @@
 import React from "react";
 import Button from "react-bootstrap/Button";
 import "../css/MainContent.css";
-//import { ipcRenderer } from "electron";
-const { ipcRenderer } = window.require("electron");
 
 function MainContent(props) {
   let mainMessage = "Recording Audio Stage";
@@ -10,7 +8,7 @@ function MainContent(props) {
   let buttonMessage = "Record";
 
   const clickHandler = (event) => {
-    ipcRenderer.send("recordButton");
+    window.ipcRenderer.send("recordButton");
   };
 
   return (
@@ -23,7 +21,7 @@ function MainContent(props) {
           className="side-button"
           variant="primary"
           style={{ width: "100%" }}
-          onClick={() => clickHandler}
+          onClick={clickHandler}
         >
           {buttonMessage}
         </Button>
