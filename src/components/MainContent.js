@@ -1,11 +1,12 @@
 import React from "react";
 import Button from "react-bootstrap/Button";
 import "../css/MainContent.css";
-import { ipcRenderer } from "electron";
+//import { ipcRenderer } from "electron";
+const { ipcRenderer } = window.require("electron");
 
 function MainContent(props) {
-  let mainMessage = "Testing this out!";
-  let secondMessage = "Second Message!";
+  let mainMessage = "Recording Audio Stage";
+  let secondMessage = "Press the button below to record...";
   let buttonMessage = "Record";
 
   const clickHandler = (event) => {
