@@ -115,7 +115,7 @@ async function recordAnalyzeAudio(file_name) {
           console.log(results[i]);
         }
       }
-      resolve({ success: true });
+      resolve({ success: "true" });
     });
   });
 
