@@ -4,11 +4,11 @@ import MainContent from "./components/MainContent";
 
 function App() {
   return (
-    <div className="row">
-      <div className="col-3">
+    <div className="row no-gutter" style={{ minHeight: "100vh" }}>
+      <div className="col-3" style={{ paddingRight: 0 }}>
         <SideBar />
       </div>
-      <div className="col">
+      <div className="col content-box">
         <MainContent />
       </div>
     </div>
