@@ -27,7 +27,11 @@ function createWindow() {
   //analyzeAudio('output.wav');
   
   recordAnalyzeAudio('output.wav');
+  //Creates output.wav
+  //Creates output.f0.csv -- Take data from columns and average for metadata
+  //Creates output.activation.png -- Plot this in react
   
+  // TODO: Fill in parseCSV function below
 }
 
 //Helps you read file contents
@@ -50,6 +54,7 @@ function readFile(filepath, mimeType){
 function analyzeAudio(file_name) {
 	let options = {
 		mode: 'text',
+		pythonOptions: ['-u'],
 		args: [file_name]
 	};
 	
@@ -102,6 +107,11 @@ function recordAnalyzeAudio(file_name) {
 		
 	});
 	
+}
+
+//Helper function that parses CSV into array. Need to get a NodeJS library I believe
+function parseCSV(filename, delimiter = ",") {
+  return;
 }
 
 
