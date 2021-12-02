@@ -106,7 +106,7 @@ async function recordAnalyzeAudio(file_name) {
     args: [file_name],
   };
 
-  let { success } = await new Promise((resovle, reject) => {
+  let { success } = await new Promise((resolve, reject) => {
     PythonShell.run("master.py", options, function (err, results) {
       if (err) throw err;
       console.log("Master Script Finished.");
@@ -115,7 +115,7 @@ async function recordAnalyzeAudio(file_name) {
           console.log(results[i]);
         }
       }
-      resolve({ success: "true" });
+      resolve({ success: true });
     });
   });
 

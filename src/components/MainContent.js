@@ -48,7 +48,7 @@ function MainContent(props) {
   };
 
   const clickHandler = (event) => {
-    setButtonMessage("Recording...");
+    setButtonMessage("Running...");
     window.ipcRenderer.send("recordButton");
   };
 
