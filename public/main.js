@@ -34,9 +34,9 @@ function createWindow() {
 
   // TODO: Fill in parseCSV function below
 
-  ipcMain.on("recordButton", () => {
+  ipcMain.on("recordButton", async () => {
     console.log("heyo!");
-    //recordAnalyzeAudio("output.wav");
+    let status = await recordAnalyzeAudio("output.wav");
     let imagePath = "output.activation.png";
     win.webContents.send("recordMain", {
       STATUS: "finished",
@@ -99,21 +99,25 @@ function recordAudio(file_name, callback) {
 }
 
 //Record and analyze
-function recordAnalyzeAudio(file_name) {
+async function recordAnalyzeAudio(file_name) {
   let options = {
     mode: "text",
     args: [file_name],
   };
 
-  PythonShell.run("master.py", options, function (err, results) {
-    if (err) throw err;
-    console.log("Master Script Finished.");
-    for (let i = 0; i < results.length; i++) {
-      if (results[i].length < 35) {
-        console.log(results[i]);
+  await PythonShell.run(
+    "master.py",
+    options,
+    await function (err, results) {
+      if (err) throw err;
+      console.log("Master Script Finished.");
+      for (let i = 0; i < results.length; i++) {
+        if (results[i].length < 35) {
+          console.log(results[i]);
+        }
       }
     }
-  });
+  );
 }
 
 //Helper function that parses CSV into array. Need to get a NodeJS library I believe
