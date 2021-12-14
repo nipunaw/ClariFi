@@ -2,6 +2,12 @@
 
 FPGA and software crossover to bring your microphone clarity and fidelity
 
+**[Hardware]**
+
+VHDL files included in 'vhdl' folder. These are standalone and separate from the software below.
+
+**[Software]**
+
 Dependencies:
 
 [Python 3.9.1]
