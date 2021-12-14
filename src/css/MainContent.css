@@ -1,0 +1,10 @@
+.content-box {
+  padding: 4rem !important;
+  background-color: var(--darker-color);
+  color: var(--white-color);
+  min-height: 100%;
+}
+
+.img-display {
+  max-width: 50%;
+}

@@ -1,0 +1,17 @@
+.side-bar {
+  background-color: var(--lighter-color);
+  min-height: 100vh;
+}
+
+.side-button {
+  color: var(--white-color);
+  font-size: 2rem !important;
+  padding-top: 1em !important;
+  padding-bottom: 1em !important;
+  background-color: var(--lighter-color) !important;
+  border-color: var(--lighter-color) !important;
+}
+
+.side-button:hover {
+  background-color: var(--darker-color) !important;
+}
