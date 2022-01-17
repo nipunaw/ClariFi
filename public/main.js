@@ -2,6 +2,7 @@ const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
 const { PythonShell } = require("python-shell");
+const SerialPort = require('serialport')
 
 function createWindow() {
   // Create the browser window.
@@ -34,6 +35,7 @@ function createWindow() {
   //Creates output.activation.png -- Plot this in react
 
   // TODO: Fill in parseCSV function below
+  listPorts();
 
   ipcMain.on("recordButton", async () => {
     console.log("heyo!");
@@ -45,6 +47,14 @@ function createWindow() {
       IMG_ALT: "Output graph from analysis",
     });
   });
+}
+
+function listPorts() {
+	SerialPort.list().then(ports => {
+		ports.forEach(function(port) {
+			console.log(port.path)
+		})
+	})	
 }
 
 //Helps you read file contents
