@@ -1,8 +1,7 @@
-import React from "react";
 import Button from "react-bootstrap/Button";
 import "../css/SideBar.css";
 
-function SideBar(props) {
+function SideBar() {
   const menuChoices = ["Calibrate", "Profiles"];
 
   const menuButtons = menuChoices.map((item, index) => (
