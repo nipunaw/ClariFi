@@ -59,10 +59,10 @@ function MainContent() {
     );
   };
 
-  const clickHandler = (event: MouseEvent) => {
+  function clickHandler() {
     setButtonMessage("Running...");
     electron.ipcRenderer.send("recordButton");
-  };
+  }
 
   useEffect(() => {
     electron.ipcRenderer.on("recordMain", function (evt, message) {
@@ -99,7 +99,7 @@ function MainContent() {
           className="side-button"
           variant="primary"
           style={{ width: "100%" }}
-          onClick={() => clickHandler}
+          onClick={clickHandler}
           disabled={isRecordingFinished ? true : false}
         >
           {buttonMessage}
