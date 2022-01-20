@@ -15,14 +15,20 @@ var constraints: AudioDevice = {
   },
 };
 
+const handleDataAvailable = (event: BlobEvent) => {
+  console.log(event.data);
+};
+
 export default function AudioRecord() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [recorder, setRecorder] = useState<MediaRecorder>();
   const [selectedDevice, setSelectedDevice] = useState<MediaDeviceInfo>();
 
   function handleSuccess(stream: MediaStream) {
-    const audioTracks = stream.getTracks();
-    console.log(audioTracks);
     if (audioRef.current) {
+      const options = { mimeType: "audio/webm" };
+      const _recorder = new MediaRecorder(stream, options);
+      setRecorder(_recorder);
       audioRef.current.srcObject = stream;
     }
   }
@@ -46,6 +52,19 @@ export default function AudioRecord() {
     }
   }, [selectedDevice]);
 
+  useEffect(() => {
+    if (recorder) {
+      recorder.ondataavailable = handleDataAvailable;
+      recorder.start();
+    }
+  }, [recorder]);
+
+  const handleClick = () => {
+    if (recorder) {
+      recorder.stop();
+    }
+  };
+
   return (
     <div className="main-content">
       <div className="display-message">
@@ -55,6 +74,7 @@ export default function AudioRecord() {
       <div className="media-player">
         <audio id="gum-local" ref={audioRef} controls autoPlay></audio>
       </div>
+      <button onClick={handleClick}>Click To Stop</button>
     </div>
   );
 }
