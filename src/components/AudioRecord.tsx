@@ -16,23 +16,15 @@ var constraints: AudioDevice = {
 };
 
 export default function AudioRecord() {
-  const audioRef = useRef(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [selectedDevice, setSelectedDevice] = useState<MediaDeviceInfo>();
-  const [audio, setAduioObject] = useState<HTMLAudioElement | null>(null);
-  const [steamTrack, setStreamTrack] = useState<MediaStreamTrack>();
-
-  const setAudioTrack = (stream: MediaStream) => {
-    if (audio) {
-      audio.srcObject = stream;
-    }
-  };
 
   function handleSuccess(stream: MediaStream) {
     const audioTracks = stream.getTracks();
     console.log(audioTracks);
-    console.log("Got stream with constraints:", constraints);
-    setStreamTrack(audioTracks[0]);
-    setAudioTrack(stream);
+    if (audioRef.current) {
+      audioRef.current.srcObject = stream;
+    }
   }
 
   function handleError(error: Error) {
@@ -44,13 +36,9 @@ export default function AudioRecord() {
     console.log(errorMessage);
   }
 
-  useEffect(() => {}, []);
-
   useEffect(() => {
     if (selectedDevice) {
       constraints.audio.deviceId = selectedDevice.deviceId;
-      console.log(selectedDevice);
-      setAduioObject(audioRef.current);
       navigator.mediaDevices
         .getUserMedia(constraints)
         .then(handleSuccess)
@@ -60,9 +48,13 @@ export default function AudioRecord() {
 
   return (
     <div className="main-content">
+      <div className="display-message">
+        {selectedDevice === undefined ? "Please select an audio device" : null}
+      </div>
       <AudioDeviceList selectDevice={setSelectedDevice} />
-      <audio id="gum-local" ref={audioRef} controls autoPlay></audio>
-      <h1>{`Using device: ${selectedDevice?.deviceId}`}</h1>
+      <div className="media-player">
+        <audio id="gum-local" ref={audioRef} controls autoPlay></audio>
+      </div>
     </div>
   );
 }

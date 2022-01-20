@@ -38,3 +38,15 @@
   margin: 20px 0px;
   border-radius: 5px;
 }
+
+.display-message {
+  height: 50px;
+  font-size: 25px;
+}
+
+.media-player {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  margin: 15px 0px;
+}
