@@ -18,3 +18,33 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.overall-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  background-color: var(--darker-color);
+  color: var(--white-color);
+  padding: 0px !important;
+}
+
+.side-container {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+  background-color: var(--lighter-color);
+  color: var(--white-color);
+  padding: 0px !important;
+}
+
+.pane-container {
+  display: flex;
+  flex: 1 1 1px;
+  min-height: 0;
+}

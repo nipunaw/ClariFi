@@ -4,12 +4,16 @@ import ContentContainer from "./components/ContentContainer";
 
 function App() {
   return (
-    <div className="row no-gutter" style={{ minHeight: "100vh" }}>
-      <div className="col-3" style={{ paddingRight: 0 }}>
-        <SideBar />
+    <div className="overall-container">
+      <div className="side-container">
+        <div className="pane-container">
+          <SideBar />
+        </div>
       </div>
-      <div className="col content-box">
-        <ContentContainer />
+      <div className="content-container">
+        <div className="pane-container">
+          <ContentContainer />
+        </div>
       </div>
     </div>
   );

@@ -5,8 +5,10 @@ import AudioRecord from "./AudioRecord";
 
 export default function ContentContainer() {
   return (
-    <div>
-      <AudioRecord />
+    <div className="inner-container">
+      <div className="overflow-content">
+        <AudioRecord />
+      </div>
     </div>
   );
 }
