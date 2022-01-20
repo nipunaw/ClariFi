@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import Button from "react-bootstrap/Button";
 import "../css/MainContent.css";
-import MainContent from "./MainContent";
+import AudioDeviceList from "./AudioDeviceList";
 //const electron = window.require("electron");
 
-const constraints = {
-  audio: true,
-  video: false,
+const constraints: MediaStreamConstraints = {
+  audio: {
+    deviceId: undefined,
+  },
 };
 
 export default function AudioRecord() {
@@ -21,10 +21,11 @@ export default function AudioRecord() {
   };
 
   function handleSuccess(stream: MediaStream) {
-    const audioTracks = stream.getAudioTracks();
+    const audioTracks = stream.getTracks();
+    console.log(audioTracks);
     console.log("Got stream with constraints:", constraints);
     setStreamTrack(audioTracks[0]);
-    setAudioTrack(stream);
+    //setAudioTrack(stream);
   }
 
   function handleError(error: Error) {
@@ -46,6 +47,7 @@ export default function AudioRecord() {
 
   return (
     <div>
+      <AudioDeviceList />
       <audio id="gum-local" ref={audioRef} controls autoPlay></audio>
       <h1>{`Using device: ${steamTrack?.label}`}</h1>
     </div>

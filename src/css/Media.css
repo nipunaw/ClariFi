@@ -1,0 +1,5 @@
+.device-button {
+  width: 100%;
+  color: var(--darker-color);
+  background-color: var(--white-color);
+}
