@@ -1,12 +1,12 @@
-import React from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import Button from "react-bootstrap/Button";
-import { DesktopCapturer, remote } from "electron";
+const { desktopCapturer, remote } = require("electron");
+const { BrowserWindow } = remote;
 import { writeFile } from "fs";
 
 // WORK IN PROGRESS CODE
 
-function MicInterface(props) {
+function MicInterface() {
   const { dialog, Menu } = remote;
 
   // Global state
@@ -39,24 +39,6 @@ function MicInterface(props) {
     }
   }
 
-  // Get the available video sources
-  async function getVideoSources() {
-    const inputSources = await DesktopCapturer.getSources({
-      types: ["window", "screen"],
-    });
-
-    const videoOptionsMenu = Menu.buildFromTemplate(
-      inputSources.map((source) => {
-        return {
-          label: source.name,
-          click: () => selectSource(source),
-        };
-      })
-    );
-
-    videoOptionsMenu.popup();
-  }
-
   // Change the videoSource window to record
   async function selectSource(source) {
     const constraints = {
@@ -73,8 +55,8 @@ function MicInterface(props) {
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
     // Preview the source in a video element
-    //videoElement.srcObject = stream;
-    //videoElement.play();
+    videoElement.srcObject = stream;
+    videoElement.play();
 
     // Create the Media Recorder
     const options = { mimeType: "video/webm; codecs=vp9" };
@@ -85,6 +67,24 @@ function MicInterface(props) {
     mediaRecorder.onstop = handleStop;
 
     // Updates the UI
+  }
+
+  // Get the available video sources
+  async function getVideoSources() {
+    const inputSources = await desktopCapturer.getSources({
+      types: ["window", "screen"],
+    });
+
+    const videoOptionsMenu = Menu.buildFromTemplate(
+      inputSources.map((source) => {
+        return {
+          label: source.name,
+          click: () => selectSource(source),
+        };
+      })
+    );
+
+    videoOptionsMenu.popup();
   }
 
   return (
