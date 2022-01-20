@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import Button from "react-bootstrap/Button";
 import "../css/MainContent.css";
 import MainContent from "./MainContent";
 import AudioRecord from "./AudioRecord";

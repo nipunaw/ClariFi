@@ -1,19 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "react-bootstrap/Button";
 import "../css/MainContent.css";
 import MainContent from "./MainContent";
 //const electron = window.require("electron");
 
+const constraints = {
+  audio: true,
+  video: false,
+};
+
 export default function AudioRecord() {
-  // Put variables in global scope to make them available to the browser console.
-  const audio = document.querySelector("audio");
+  const audioRef = useRef(null);
+  const [audio, setAduioObject] = useState<HTMLAudioElement | null>(null);
+  const [steamTrack, setStreamTrack] = useState<MediaStreamTrack>();
 
-  const constraints = {
-    audio: true,
-    video: false,
-  };
-
-  const setAudio = (stream: MediaStream) => {
+  const setAudioTrack = (stream: MediaStream) => {
     if (audio) {
       audio.srcObject = stream;
     }
@@ -22,13 +23,8 @@ export default function AudioRecord() {
   function handleSuccess(stream: MediaStream) {
     const audioTracks = stream.getAudioTracks();
     console.log("Got stream with constraints:", constraints);
-    console.log("Using audio device: " + audioTracks[0].label);
-    /*
-    stream.oninactive = function () {
-      console.log("Stream ended");
-    };
-    */
-    setAudio(stream);
+    setStreamTrack(audioTracks[0]);
+    setAudioTrack(stream);
   }
 
   function handleError(error: Error) {
@@ -41,16 +37,17 @@ export default function AudioRecord() {
   }
 
   useEffect(() => {
-    console.log("here");
+    setAduioObject(audioRef.current);
     navigator.mediaDevices
       .getUserMedia(constraints)
       .then(handleSuccess)
       .catch(handleError);
   }, []);
 
-  if (!audio) {
-    return null;
-  }
-
-  return <div></div>;
+  return (
+    <div>
+      <audio id="gum-local" ref={audioRef} controls autoPlay></audio>
+      <h1>{`Using device: ${steamTrack?.label}`}</h1>
+    </div>
+  );
 }
