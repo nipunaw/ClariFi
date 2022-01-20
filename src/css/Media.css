@@ -1,5 +1,40 @@
-.device-button {
+.device-btn {
+  display: flex;
+  align-items: center;
+  height: 50px;
   width: 100%;
-  color: var(--darker-color);
   background-color: var(--white-color);
+  color: var(--darker-color);
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.device-btn:last-of-type {
+  margin: 0px;
+}
+
+.device-btn:hover {
+  background-color: var(--lighter-color);
+  color: var(--white-color);
+  cursor: pointer;
+}
+
+.device-btn-selected {
+  background-color: var(--lighter-color);
+  color: var(--white-color);
+  cursor: default !important;
+  font-weight: 600;
+}
+
+.device-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: var(--overlay-color);
+  padding: 1.2rem 1rem;
+  margin: 20px 0px;
+  border-radius: 5px;
 }

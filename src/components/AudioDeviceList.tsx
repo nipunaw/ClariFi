@@ -1,30 +1,42 @@
 import { useEffect } from "react";
 import "css/Media.css";
 import { useState } from "react";
+import DeviceButton from "./DeviceButton";
 
-const getDeviceButtons = (devices: MediaDeviceInfo[]): JSX.Element[] => {
-  return devices
-    .filter((currentDevice) => {
-      if (currentDevice.kind === "audioinput") {
-        return currentDevice;
-      }
-    })
-    .map((validDevice, index) => {
-      let deviceLabel = validDevice.label;
-      return (
-        <div key={index} className="device-button">
-          {deviceLabel}
-        </div>
-      );
-    });
-};
+const AudioDeviceList: React.FC<{
+  selectDevice: (deviceInfo: MediaDeviceInfo) => any;
+}> = ({ selectDevice }) => {
+  const [selectId, setSelectId] = useState<string>();
+  const [deviceInfoArray, setDeviceInfoArray] = useState<MediaDeviceInfo[]>([]);
 
-export default function AudioDeviceList() {
-  const [buttons, setButtons] = useState<JSX.Element[]>([]);
+  const handleSelectDevice = (deviceInfo: MediaDeviceInfo) => {
+    setSelectId(deviceInfo.deviceId);
+    selectDevice(deviceInfo);
+  };
+
+  const getDeviceButtons = (devices: MediaDeviceInfo[]): JSX.Element[] => {
+    return devices
+      .filter((currentDevice) => {
+        if (currentDevice.kind === "audioinput") {
+          return currentDevice;
+        }
+      })
+      .map((validDevice, index) => {
+        let deviceInfo = validDevice;
+        let isSelected = selectId === deviceInfo.deviceId ? true : false;
+        return (
+          <DeviceButton
+            key={index}
+            deviceInfo={deviceInfo}
+            isSelected={isSelected}
+            selectDevice={handleSelectDevice}
+          />
+        );
+      });
+  };
 
   const handleSuccess = (devices: MediaDeviceInfo[]) => {
-    const buttonList = getDeviceButtons(devices);
-    setButtons(buttonList);
+    setDeviceInfoArray(devices);
   };
 
   useEffect(() => {
@@ -34,5 +46,8 @@ export default function AudioDeviceList() {
       .catch((err) => console.log(err));
   }, []);
 
-  return <div>{buttons}</div>;
-}
+  const buttonObjects = getDeviceButtons(deviceInfoArray);
+  return <div className="device-list">{buttonObjects}</div>;
+};
+
+export default AudioDeviceList;

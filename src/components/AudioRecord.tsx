@@ -11,6 +11,7 @@ const constraints: MediaStreamConstraints = {
 
 export default function AudioRecord() {
   const audioRef = useRef(null);
+  const [selectedDevice, setSelectedDevice] = useState<MediaDeviceInfo>();
   const [audio, setAduioObject] = useState<HTMLAudioElement | null>(null);
   const [steamTrack, setStreamTrack] = useState<MediaStreamTrack>();
 
@@ -47,9 +48,9 @@ export default function AudioRecord() {
 
   return (
     <div>
-      <AudioDeviceList />
+      <AudioDeviceList selectDevice={setSelectedDevice} />
       <audio id="gum-local" ref={audioRef} controls autoPlay></audio>
-      <h1>{`Using device: ${steamTrack?.label}`}</h1>
+      <h1>{`Using device: ${selectedDevice?.deviceId}`}</h1>
     </div>
   );
 }
