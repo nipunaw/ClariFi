@@ -36,7 +36,36 @@ function createWindow() {
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate); //Set menu
   Menu.setApplicationMenu(mainMenu);
+  
+  win.webContents.session.on('select-serial-port', (event, portList, webContents, callback) => {
+    event.preventDefault()
+    if (portList && portList.length > 0) {
+      callback(portList[0].portId)
+    } else {
+      callback('') //Could not find any matching devices
+    }
+  })
 
+  win.webContents.session.on('serial-port-added', (event, port) => {
+    console.log('serial-port-added FIRED WITH', port)
+  })
+
+  win.webContents.session.on('serial-port-removed', (event, port) => {
+    console.log('serial-port-removed FIRED WITH', port)
+  })
+
+  win.webContents.session.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
+    if (permission === 'serial' && details.securityOrigin === 'file:///') {
+      return true
+    }
+  })
+
+  win.webContents.session.setDevicePermissionHandler((details) => {
+    if (details.deviceType === 'serial' && details.origin === 'file://') {
+      return true
+    }
+  })
+  
   //readFile('test.wav','base64');
   //recordAudio('output.wav', analyzeAudio);
   //recordAudio('output.wav');
@@ -47,11 +76,11 @@ function createWindow() {
   //Creates output.activation.png -- Plot this in react
 
   // TODO: Fill in parseCSV function below
-  listPorts();
-  writeData("Test message");
-  readData();
+  //listPorts();
+  //writeData("Test message");
+  //readData();
   
-  pitchAnalyze("output.wav"); //Example wav
+  //pitchAnalyze("output.wav"); //Example wav
 
   ipcMain.on("recordButton", async () => {
     console.log("heyo!");
