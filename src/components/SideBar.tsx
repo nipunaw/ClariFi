@@ -5,13 +5,11 @@ function SideBar() {
   const menuChoices = ["Calibrate", "Profiles"];
 
   const menuButtons = menuChoices.map((item, index) => (
-    <div className="row" key={index}>
-      <Button key={index} className="side-button" variant="primary">
-        {item}
-      </Button>
-    </div>
+    <Button key={index} className="side-button" variant="primary">
+      {item}
+    </Button>
   ));
-  return <div className="col side-bar">{menuButtons}</div>;
+  return <div className="side-bar">{menuButtons}</div>;
 }
 
 export default SideBar;
