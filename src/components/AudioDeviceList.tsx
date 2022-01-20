@@ -20,6 +20,7 @@ const AudioDeviceList: React.FC<{
         if (currentDevice.kind === "audioinput") {
           return currentDevice;
         }
+        return null;
       })
       .map((validDevice, index) => {
         let deviceInfo = validDevice;
