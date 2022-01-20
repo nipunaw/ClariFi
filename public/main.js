@@ -1,7 +1,9 @@
+// Generics
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
 const { PythonShell } = require("python-shell");
+// Serial Port functionality
 const SerialPort = require('serialport');
 const port = new SerialPort('COM3', function (err) {
 	  if (err) {
@@ -9,6 +11,10 @@ const port = new SerialPort('COM3', function (err) {
 	  }
 	  baudRate: 9600
 })
+// Pitch detection library
+const WavDecoder = require("wav-decoder");
+const Pitchfinder = require("pitchfinder");
+
 
 function createWindow() {
   // Create the browser window.
@@ -44,6 +50,8 @@ function createWindow() {
   listPorts();
   writeData("Test message");
   readData();
+  
+  pitchAnalyze("output.wav"); //Example wav
 
   ipcMain.on("recordButton", async () => {
     console.log("heyo!");
@@ -78,6 +86,15 @@ function readData() {
 	port.on('readable', function () {
 	  console.log('Data:', port.read().toString('utf8'))
 	})
+}
+
+function pitchAnalyze(file_path) {
+	const detectPitch = Pitchfinder.DynamicWavelet();
+	const buffer = fs.readFileSync(file_path);
+	const decoded = WavDecoder.decode.sync(buffer);
+	const float32Array = decoded.channelData[0];
+	const pitch = detectPitch(float32Array);
+	console.dir(pitch);
 }
 
 //Helps you read file contents
