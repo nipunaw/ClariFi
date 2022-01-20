@@ -3,7 +3,13 @@ import "../css/MainContent.css";
 import AudioDeviceList from "./AudioDeviceList";
 //const electron = window.require("electron");
 
-const constraints: MediaStreamConstraints = {
+interface AudioDevice extends MediaStreamConstraints {
+  audio: {
+    deviceId: string | undefined;
+  };
+}
+
+var constraints: AudioDevice = {
   audio: {
     deviceId: undefined,
   },
@@ -26,7 +32,7 @@ export default function AudioRecord() {
     console.log(audioTracks);
     console.log("Got stream with constraints:", constraints);
     setStreamTrack(audioTracks[0]);
-    //setAudioTrack(stream);
+    setAudioTrack(stream);
   }
 
   function handleError(error: Error) {
@@ -38,13 +44,19 @@ export default function AudioRecord() {
     console.log(errorMessage);
   }
 
+  useEffect(() => {}, []);
+
   useEffect(() => {
-    setAduioObject(audioRef.current);
-    navigator.mediaDevices
-      .getUserMedia(constraints)
-      .then(handleSuccess)
-      .catch(handleError);
-  }, []);
+    if (selectedDevice) {
+      constraints.audio.deviceId = selectedDevice.deviceId;
+      console.log(selectedDevice);
+      setAduioObject(audioRef.current);
+      navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then(handleSuccess)
+        .catch(handleError);
+    }
+  }, [selectedDevice]);
 
   return (
     <div className="main-content">
