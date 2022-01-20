@@ -47,7 +47,7 @@ export default function AudioRecord() {
   }, []);
 
   return (
-    <div>
+    <div className="main-content">
       <AudioDeviceList selectDevice={setSelectedDevice} />
       <audio id="gum-local" ref={audioRef} controls autoPlay></audio>
       <h1>{`Using device: ${selectedDevice?.deviceId}`}</h1>

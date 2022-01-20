@@ -5,10 +5,18 @@
 .inner-container {
   flex: 1 1 auto;
   height: 100%;
+  width: 100%;
   overflow-y: auto;
+  overflow-x: auto;
 }
 
 .overflow-content {
   padding: 4rem !important;
   padding: 1.5rem 1.5rem;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  word-break: break-all;
 }
