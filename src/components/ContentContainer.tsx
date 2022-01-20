@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import "../css/MainContent.css";
 import MainContent from "./MainContent";
+import AudioRecord from "./AudioRecord";
 const electron = window.require("electron");
 
 export default function ContentContainer() {
   return (
     <div>
-      <MainContent />
+      <AudioRecord />
     </div>
   );
 }
