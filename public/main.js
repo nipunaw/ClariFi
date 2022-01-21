@@ -2,10 +2,7 @@
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
-
-// Pitch detection library
-const WavDecoder = require("wav-decoder");
-const Pitchfinder = require("pitchfinder");
+const { GetPitchValue } = require("./main/audioProcess");
 
 function createWindow() {
   // Create the browser window.
@@ -63,30 +60,10 @@ function createWindow() {
     }
   );
 
-  //readFile('test.wav','base64');
-
-  //pitchAnalyze("output.wav"); //Example wav
-
   ipcMain.on("recordButton", (event, float32Array) => {
-    console.log("heyo!");
-    console.log(float32Array);
-    //let status = await recordAnalyzeAudio("output.wav");
-    let imagePath = "output.activation.png";
-    win.webContents.send("recordMain", {
-      STATUS: "finished",
-      IMG_PATH: imagePath,
-      IMG_ALT: "Output graph from analysis",
-    });
+    const pitch = GetPitchValue(float32Array);
+    console.log(`Value: ${pitch}`);
   });
-}
-
-function pitchAnalyze(file_path) {
-  const detectPitch = Pitchfinder.DynamicWavelet();
-  const buffer = fs.readFileSync(file_path);
-  const decoded = WavDecoder.decode.sync(buffer);
-  const float32Array = decoded.channelData[0];
-  const pitch = detectPitch(float32Array);
-  console.dir(pitch);
 }
 
 //Helps you read file contents
