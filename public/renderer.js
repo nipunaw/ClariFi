@@ -4,16 +4,13 @@ async function testIt() {
 		{ usbVendorId: 0x005d, usbProductId: 0x223b }
 	];
 	
-	const port = await navigator.serial.requestPort();
-
-	const reader = port.readable.getReader();
-	const { value, done } = await reader.read();
-	console.log(value);
-	console.log(done);
-	reader.releaseLock();
-
-	// Allow the serial port to be closed later.
-	//writer.releaseLock();
+	const port = await navigator.serial.requestPort(filters);
+	await port.open({ baudRate: 9600 });
+	
+	const writer = port.writable.getWriter();
+	const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
+	await writer.write(data);
+	writer.releaseLock();
 	
 	await port.close();
 
