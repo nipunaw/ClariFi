@@ -16,6 +16,10 @@ var constraints: AudioDevice = {
   },
 };
 
+interface AnalyzeData {
+  pitch: number;
+}
+
 const handleDataAvailable = (event: BlobEvent) => {
   let audioCtx = new AudioContext();
   event.data.arrayBuffer().then((arrayBuf) => {
