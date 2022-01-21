@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../css/MainContent.css";
 import AudioDeviceList from "./AudioDeviceList";
+import * as Pitchfinder from "pitchfinder";
 //const electron = window.require("electron");
 
 interface AudioDevice extends MediaStreamConstraints {
@@ -16,7 +17,16 @@ var constraints: AudioDevice = {
 };
 
 const handleDataAvailable = (event: BlobEvent) => {
-  console.log(event.data);
+  let audioCtx = new AudioContext();
+  event.data.arrayBuffer().then((arrayBuf) => {
+    audioCtx.decodeAudioData(arrayBuf).then((buffer) => {
+      const float32Array = buffer.getChannelData(0); // get a single channel of sound
+      const detectPitch = Pitchfinder.AMDF();
+      const pitch = detectPitch(float32Array);
+      console.log(`Pitch: ${pitch}`);
+      return buffer;
+    });
+  });
 };
 
 export default function AudioRecord() {
@@ -62,6 +72,7 @@ export default function AudioRecord() {
   const handleClick = () => {
     if (recorder) {
       recorder.stop();
+      setRecorder(undefined);
     }
   };
 
