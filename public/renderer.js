@@ -15,3 +15,11 @@ async function testIt() {
 	await port.close();
 
 }
+
+navigator.serial.addEventListener("connect", (event) => {
+  console.log("Device connected");
+});
+
+navigator.serial.addEventListener("disconnect", (event) => {
+  console.log("Device disconnected");
+});
