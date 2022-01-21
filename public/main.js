@@ -1,12 +1,16 @@
-const { app, BrowserWindow, Menu } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain } = require("electron");
+const fs = require("fs");
+const { resolve } = require("path");
 
 function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1000,
+    height: 800,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
+      preload: __dirname + "/preload.js",
     },
   });
 
@@ -14,10 +18,36 @@ function createWindow() {
   win.loadURL("http://localhost:3000");
 
   // Open the DevTools.
-  win.webContents.openDevTools();
+  //win.webContents.openDevTools();
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate); //Set menu
   Menu.setApplicationMenu(mainMenu);
+
+  ipcMain.on("recordButton", async () => {
+    console.log("heyo!");
+    //let status = await recordAnalyzeAudio("output.wav");
+    let imagePath = "output.activation.png";
+    win.webContents.send("recordMain", {
+      STATUS: "finished",
+      IMG_PATH: imagePath,
+      IMG_ALT: "Output graph from analysis",
+    });
+  });
+}
+
+//Helps you read file contents
+function readFile(filepath, mimeType) {
+  pathToFile = filepath.replace("file:\\\\", "");
+  pathToFile = pathToFile.replace(/\\/, "\\\\");
+
+  fs.readFile(filepath, mimeType, (err, data) => {
+    if (err) {
+      alert("An error ocurred reading the file :" + err.message);
+      return;
+    }
+    // Change how to handle the file content
+    console.log("The file content is : " + data);
+  });
 }
 
 // This method will be called when Electron has finished
