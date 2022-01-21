@@ -4,26 +4,17 @@ FPGA and software crossover to bring your microphone clarity and fidelity
 
 **[Hardware]**
 
-VHDL files included in 'vhdl' folder. These are standalone and separate from the software below.
+VHDL files included in 'vhdl' folder. Schematic files included in 'schematics' folder.
 
 **[Software]**
 
 Dependencies:
-
-[Python 3.9.1]
-
-- pip install tensorflow
-- pip install crepe
-- pip install sounddevice
 
 [Node.js 16.13.1]
 
 Steps to run:
 
 - npm install
-- npm install -g http-server
-- Go to ClariFi/
-- http-server ./
 - npm start (Run React Server)
 - npm run electron-dev (Run Electron Application)
 
