@@ -36,11 +36,30 @@ function createWindow() {
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate); //Set menu
   Menu.setApplicationMenu(mainMenu);
   
+  win.webContents.session.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
+    if (permission === 'serial' || permission === 'media') {
+      return true
+    }
+    return false
+  })
+  
   win.webContents.session.setDevicePermissionHandler((details) => {
-    if (details.deviceType === 'serial' && details.device.vendorId === 0x0403 && details.device.productId === 0x6010) {
+    if (details.deviceType === 'serial' && details.device.vendorId === 1027 && details.device.productId === 24592) {
       return true;
     }
     return false
+  })
+  
+  win.webContents.session.on('select-serial-port', (event, portList, webContents, callback) => {
+    event.preventDefault()
+    const selectedPort = portList.find((device) => {
+      return device.vendorId === '1027' && device.productId === '24592'
+    })
+    if (!selectedPort) {
+      callback('')
+    } else {
+      callback(selectedPort.portId)
+    }
   })
   
   //readFile('test.wav','base64');
