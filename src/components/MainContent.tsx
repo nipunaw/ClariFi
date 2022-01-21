@@ -1,19 +1,25 @@
-import { React, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import "../css/MainContent.css";
+const electron = window.require("electron");
 
-function MainContent(props) {
+interface ImageInfo {
+  alt: string;
+  fsPath: string;
+}
+
+function MainContent() {
   const defaultMessages = {
     mainMessage: "Recording Audio Stage",
     secondMessage: "Press the button below to record 5 seconds...",
   };
   const [buttonMessage, setButtonMessage] = useState("Record");
   const [isRecordingFinished, setRecordingStatus] = useState(false);
-  const [recordingData, setRecordingData] = useState(null);
+  const [recordingData, setRecordingData] = useState<ImageInfo | null>(null);
   const [displayMessages, setDisplayMessages] = useState(defaultMessages);
-  const [displayResult, setDisplayResult] = useState(null);
+  const [displayResult, setDisplayResult] = useState<JSX.Element | null>(null);
 
-  const getImage = (imageInfo) => {
+  const getImage = (imageInfo: ImageInfo): JSX.Element => {
     /*
     {
         imageInfo: {
@@ -33,15 +39,17 @@ function MainContent(props) {
         </div>
       );
 
-    return <p>{imageInfo.alt}</p>;
+    return <p>{`Error loading the image`}</p>;
   };
 
-  const displayRecordingResults = (recordingData) => {
+  const displayRecordingResults = (
+    recordingData: ImageInfo | null
+  ): JSX.Element | null => {
     if (!recordingData) {
       return null;
     }
     let headerLabel = <h2>Magnitude Frequency Response: </h2>;
-    let image = getImage(recordingData.imageInfo);
+    let image = getImage(recordingData);
 
     return (
       <div className="mt-5">
@@ -51,19 +59,20 @@ function MainContent(props) {
     );
   };
 
-  const clickHandler = (event) => {
+  function clickHandler() {
     setButtonMessage("Running...");
-    window.ipcRenderer.send("recordButton");
-  };
+    electron.ipcRenderer.send("recordButton");
+  }
 
   useEffect(() => {
-    window.ipcRenderer.on("recordMain", function (evt, message) {
+    electron.ipcRenderer.on("recordMain", function (evt, message) {
       console.log(message);
       if (message.STATUS === "finished") {
         setButtonMessage("Finished!");
-        let url = "http://127.0.0.1:8080/" + message.IMG_PATH;
-        let recievedData = {
-          imageInfo: { fsPath: url, alt: message.IMG_ALT },
+        const url: string = "http://127.0.0.1:8080/" + message.IMG_PATH;
+        let recievedData: ImageInfo = {
+          fsPath: url,
+          alt: message.IMG_ALT,
         };
         setRecordingData(recievedData);
         setRecordingStatus(true);
