@@ -1,10 +1,6 @@
-async function testIt() {
-	const filters = [
-		{ usbVendorId: 0x0403, usbProductId: 0x6010 } // FPGA
-	];
-	
-	const port = await navigator.serial.requestPort({filters});
-	const ports = await navigator.serial.getPorts();
+async function serialWrite() {
+
+	const port = await navigator.serial.requestPort();
 	await port.open({ baudRate: 9600 });
 	
 	const writer = port.writable.getWriter();

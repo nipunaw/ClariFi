@@ -2,18 +2,10 @@
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
-// Serial Port functionality
-const SerialPort = require('serialport');
-const port = new SerialPort('COM3', function (err) {
-	  if (err) {
-		return console.log('Error: ', err.message)
-	  }
-	  baudRate: 9600
-})
+
 // Pitch detection library
 const WavDecoder = require("wav-decoder");
 const Pitchfinder = require("pitchfinder");
-
 
 function createWindow() {
   // Create the browser window.
@@ -63,10 +55,6 @@ function createWindow() {
   })
   
   //readFile('test.wav','base64');
-
-  //listPorts();
-  //writeData("Test message");
-  //readData();
   
   //pitchAnalyze("output.wav"); //Example wav
 
@@ -80,29 +68,6 @@ function createWindow() {
       IMG_ALT: "Output graph from analysis",
     });
   });
-}
-
-function listPorts() {
-	SerialPort.list().then(ports => {
-		ports.forEach(function(port) {
-			console.log(port.path)
-		})
-	})	
-}
-
-function writeData(to_write_string) {
-	port.write(to_write_string, function(err) {
-	  if (err) {
-		return console.log('Error on write: ', err.message)
-	  }
-	  console.log('Message written')
-	})
-}
-
-function readData() {
-	port.on('readable', function () {
-	  console.log('Data:', port.read().toString('utf8'))
-	})
 }
 
 function pitchAnalyze(file_path) {
