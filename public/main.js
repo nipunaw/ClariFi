@@ -1,6 +1,11 @@
+// Generics
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
+
+// Pitch detection library
+const WavDecoder = require("wav-decoder");
+const Pitchfinder = require("pitchfinder");
 
 function createWindow() {
   // Create the browser window.
@@ -22,6 +27,36 @@ function createWindow() {
 
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate); //Set menu
   Menu.setApplicationMenu(mainMenu);
+  
+  win.webContents.session.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
+    if (permission === 'serial' || permission === 'media') {
+      return true
+    }
+    return false
+  })
+  
+  win.webContents.session.setDevicePermissionHandler((details) => {
+    if (details.deviceType === 'serial' && details.device.vendorId === 1027 && details.device.productId === 24592) {
+      return true;
+    }
+    return false
+  })
+  
+  win.webContents.session.on('select-serial-port', (event, portList, webContents, callback) => {
+    event.preventDefault()
+    const selectedPort = portList.find((device) => {
+      return device.vendorId === '1027' && device.productId === '24592'
+    })
+    if (!selectedPort) {
+      callback('')
+    } else {
+      callback(selectedPort.portId)
+    }
+  })
+  
+  //readFile('test.wav','base64');
+  
+  //pitchAnalyze("output.wav"); //Example wav
 
   ipcMain.on("recordButton", async () => {
     console.log("heyo!");
@@ -33,6 +68,15 @@ function createWindow() {
       IMG_ALT: "Output graph from analysis",
     });
   });
+}
+
+function pitchAnalyze(file_path) {
+	const detectPitch = Pitchfinder.DynamicWavelet();
+	const buffer = fs.readFileSync(file_path);
+	const decoded = WavDecoder.decode.sync(buffer);
+	const float32Array = decoded.channelData[0];
+	const pitch = detectPitch(float32Array);
+	console.dir(pitch);
 }
 
 //Helps you read file contents
