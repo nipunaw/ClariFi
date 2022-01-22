@@ -2,6 +2,9 @@
 
 FPGA and software crossover to bring your microphone clarity and fidelity
 
+**[Time Logs]**
+Time logging notes beyond git commits are available in **resources/**.
+
 **[Hardware]**
 
 VHDL files included in 'vhdl' folder. Schematic files included in 'schematics' folder.
