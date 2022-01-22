@@ -1,5 +1,5 @@
 // Generics
-const { app, BrowserWindow, Menu, ipcMain, ipcRenderer } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
 const { GetPitchValue } = require("./main/audioProcess");
