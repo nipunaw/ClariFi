@@ -38,11 +38,12 @@ export default function AudioRecord() {
   const [mediaStream, setMediaStream] = useState<MediaStream>();
   const [recorder, setRecorder] = useState<MediaRecorder>();
   const [selectedDevice, setSelectedDevice] = useState<MediaDeviceInfo>();
+  const [feedbackMsg, setFeedbackMsg] = useState<string | null>();
 
   useEffect(() => {
-    electron.ipcRenderer.on("audio-finished", () => {
+    electron.ipcRenderer.on("audio-finished", (event, message) => {
       setState(AudioState.Ready);
-      console.log("finisheddd");
+      setFeedbackMsg(message);
     });
   }, []);
 
@@ -78,6 +79,7 @@ export default function AudioRecord() {
 
   const handleClick = () => {
     if (state === AudioState.Ready && selectedDevice) {
+      setFeedbackMsg(null);
       setState(AudioState.Recording);
       constraints.audio.deviceId = selectedDevice.deviceId;
       navigator.mediaDevices
@@ -128,7 +130,7 @@ export default function AudioRecord() {
     );
   };
 
-  const getMessage = (): string | null => {
+  const getStateMessage = (): string | null => {
     if (state === AudioState.Idle) {
       return "Please select an audio device";
     } else if (state === AudioState.Loading) {
@@ -141,7 +143,10 @@ export default function AudioRecord() {
 
   return (
     <div className="main-content">
-      <div className="display-message">{getMessage()}</div>
+      <div className="display-message">
+        {getStateMessage()}
+        {feedbackMsg}
+      </div>
       <AudioDeviceList selectDevice={setSelectedDevice} />
       {/*
       <div className="media-player">
