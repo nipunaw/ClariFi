@@ -65,7 +65,7 @@ function createWindow() {
     console.log(`Value: ${pitch}`);
     win.webContents.send(
       "audio-finished",
-      `Sent information over UART if connected`
+      `Sent data over UART if FPGA is connected`
     );
   });
 }
