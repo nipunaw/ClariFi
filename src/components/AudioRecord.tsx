@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import "../css/MainContent.css";
 import AudioDeviceList from "./AudioDeviceList";
+import { writeSerial } from "functions/serial";
 const electron = window.require("electron");
 
 enum AudioState {
@@ -28,6 +29,8 @@ const handleDataAvailable = (event: BlobEvent) => {
     audioCtx.decodeAudioData(arrayBuf).then((buffer) => {
       const float32Array = buffer.getChannelData(0); // get a single channel of sound
       electron.ipcRenderer.send("process-audio", float32Array);
+      const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
+      writeSerial(data);
     });
   });
 };
