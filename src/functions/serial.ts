@@ -3,7 +3,7 @@ const accessPort = () => {
   navigator.serial
     .requestPort()
     .then((port: any) => {
-      port.open({ baudRate: 9600 });
+      port.open({ baudRate: 115200 });
       return port;
     })
     .catch((err: Error) => {
