@@ -1,5 +1,5 @@
 // Generics
-const { app, BrowserWindow, Menu, ipcMain } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain, ipcRenderer } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
 const { GetPitchValue } = require("./main/audioProcess");
@@ -60,9 +60,10 @@ function createWindow() {
     }
   );
 
-  ipcMain.on("recordButton", (event, float32Array) => {
+  ipcMain.on("process-audio", (event, float32Array) => {
     const pitch = GetPitchValue(float32Array);
     console.log(`Value: ${pitch}`);
+    win.webContents.send("audio-finished");
   });
 }
 
