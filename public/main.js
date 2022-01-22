@@ -63,7 +63,10 @@ function createWindow() {
   ipcMain.on("process-audio", (event, float32Array) => {
     const pitch = GetPitchValue(float32Array);
     console.log(`Value: ${pitch}`);
-    win.webContents.send("audio-finished", `Pitch is ${pitch}`);
+    win.webContents.send(
+      "audio-finished",
+      `Sent information over UART if connected`
+    );
   });
 }
 
