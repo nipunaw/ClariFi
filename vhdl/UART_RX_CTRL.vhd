@@ -31,7 +31,7 @@ end UART_RX_CTRL;
 architecture BHV of UART_RX_CTRL is
  
   type state_type is (S_START, S_START_BIT, S_DATA_BITS, S_STOP_BIT, S_DONE);
-  signal state : state_type;-- := S_START;
+  signal state : state_type := S_START;
  
   signal r_UART_RX : std_logic := '0';
   signal r_r_UART_RX   : std_logic := '0';
@@ -56,11 +56,10 @@ begin
 			  r_Bit_Counter <= 0;
 			  r_Bit_Index <= 0;
 	 
-			  if falling_edge(r_r_UART_RX) then -- Start bit transitioned from '1' to '0'
+			  if (r_r_UART_RX = '0') then -- falling_edge(r_r_UART_RX) then -- Start bit transitioned from '1' to '0'
 				state <= S_START_BIT;
-			  else
-				state <= S_START;
 			  end if;
+			  state <= S_START;
 	 
 			-- Sample half bit later to make sure it's still low
 			when S_START_BIT =>

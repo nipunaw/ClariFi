@@ -4,7 +4,7 @@ async function serialWrite() {
 	await port.open({ baudRate: 9600 });
 	
 	const writer = port.writable.getWriter();
-	const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
+	const data = new Uint8Array([4]); // hello
 	await writer.write(data);
 	writer.releaseLock();
 	
