@@ -1,32 +1,31 @@
-const accessPort = () => {
+const getPort = async () => {
   let navigator: any = window.navigator;
-  navigator.serial
-    .requestPort()
-    .then((port: any) => {
-      port.open({ baudRate: 115200 });
-      return port;
-    })
-    .catch((err: Error) => {
-      console.error(err);
-    });
-  return undefined;
+  const port = await navigator.serial.requestPort();
+  await port.open({ baudRate: 115200 });
+  return port;
 };
 
-export const writeSerial = (data: Uint8Array) => {
-  const port = accessPort() as any;
-  if (port) {
+const writeData = async (port: any, data: Uint8Array): Promise<boolean> => {
+  try {
     const writer = port.writable.getWriter();
-    writer
-      .write(data)
-      .then(() => {
-        writer.releaseLock();
-      })
-      .then(() => {
-        port.close();
-      })
-      .catch((err: Error) => {
-        console.error(err);
-      });
+    writer.write(data);
+    await writer.releaseLock();
+    await port.close();
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+};
+
+export const writeSerial = async (data: Uint8Array): Promise<boolean> => {
+  try {
+    const port = await getPort();
+    const status = await writeData(port, data);
+    return status;
+  } catch (err) {
+    console.error(err);
+    return false;
   }
 };
 
