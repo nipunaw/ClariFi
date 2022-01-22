@@ -1,3 +1,15 @@
+export async function writeSerial(data : Uint8Array) {
+	let navigator: any = window.navigator;
+    const port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 115200 });
+    
+    const writer = port.writable.getWriter();
+    await writer.write(data);
+    writer.releaseLock();
+    
+    await port.close();
+}
+
 const accessPort = () => {
   let navigator: any = window.navigator;
   navigator.serial
@@ -12,7 +24,7 @@ const accessPort = () => {
   return undefined;
 };
 
-export const writeSerial = (data: Uint8Array) => {
+export const writeSerial_WIP = (data: Uint8Array) => {
   const port = accessPort() as any;
   if (port) {
     const writer = port.writable.getWriter();
