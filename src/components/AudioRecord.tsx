@@ -38,9 +38,7 @@ const handleDataAvailable = (event: BlobEvent) => {
 };
 
 export default function AudioRecord() {
-  //const audioRef = useRef<HTMLAudioElement>(null);
   const [state, setState] = useState<AudioState>(AudioState.Idle);
-  const [mediaStream, setMediaStream] = useState<MediaStream>();
   const [recorder, setRecorder] = useState<MediaRecorder>();
   const [selectedDevice, setSelectedDevice] = useState<MediaDeviceInfo>();
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>();
@@ -53,11 +51,11 @@ export default function AudioRecord() {
   }, []);
 
   function handleSuccess(stream: MediaStream) {
-    setMediaStream(stream);
     const options = { mimeType: "audio/webm" };
     const _recorder = new MediaRecorder(stream, options);
+    _recorder.ondataavailable = handleDataAvailable;
+    _recorder.start();
     setRecorder(_recorder);
-    //audioRef.current.srcObject = stream;
   }
 
   function handleError(error: Error) {
@@ -75,13 +73,6 @@ export default function AudioRecord() {
     }
   }, [selectedDevice]);
 
-  useEffect(() => {
-    if (recorder) {
-      recorder.ondataavailable = handleDataAvailable;
-      recorder.start();
-    }
-  }, [recorder]);
-
   const handleClick = () => {
     if (state === AudioState.Ready && selectedDevice) {
       setFeedbackMsg(null);
@@ -96,9 +87,6 @@ export default function AudioRecord() {
       if (recorder) {
         recorder.stop();
         setRecorder(undefined);
-      }
-      if (mediaStream) {
-        setMediaStream(undefined);
       }
     }
   };
@@ -153,11 +141,6 @@ export default function AudioRecord() {
         {feedbackMsg}
       </div>
       <AudioDeviceList selectDevice={setSelectedDevice} />
-      {/*
-      <div className="media-player">
-        <audio id="gum-local" ref={audioRef} controls autoPlay></audio>
-      </div>
-      */}
       {getButton()}
     </div>
   );
