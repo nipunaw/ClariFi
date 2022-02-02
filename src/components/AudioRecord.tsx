@@ -23,6 +23,20 @@ var constraints: AudioDevice = {
   },
 };
 
+const RECORD_MS_TIME = 5000;
+
+const handleStart = (event: Event) => {
+  setTimeout(function () {
+    let eventRecorder = event.target as MediaRecorder;
+    eventRecorder.stop();
+  }, RECORD_MS_TIME);
+};
+
+const handleStop = (setRecorderState: () => void, updateState: () => void) => {
+  setRecorderState();
+  updateState();
+};
+
 const handleDataAvailable = (event: BlobEvent) => {
   let audioCtx = new AudioContext();
   event.data.arrayBuffer().then((arrayBuf) => {
@@ -53,6 +67,12 @@ export default function AudioRecord() {
   function handleSuccess(stream: MediaStream) {
     const options = { mimeType: "audio/webm" };
     const _recorder = new MediaRecorder(stream, options);
+    _recorder.onstart = handleStart;
+    _recorder.onstop = () =>
+      handleStop(
+        () => setRecorder(undefined),
+        () => setState(AudioState.Loading)
+      );
     _recorder.ondataavailable = handleDataAvailable;
     _recorder.start();
     setRecorder(_recorder);
@@ -82,12 +102,6 @@ export default function AudioRecord() {
         .getUserMedia(constraints)
         .then(handleSuccess)
         .catch(handleError);
-    } else if (state === AudioState.Recording) {
-      setState(AudioState.Loading);
-      if (recorder) {
-        recorder.stop();
-        setRecorder(undefined);
-      }
     }
   };
 
@@ -102,8 +116,8 @@ export default function AudioRecord() {
         break;
       }
       case AudioState.Recording: {
-        buttonDisplay = "Click to Stop";
-        isDisabled = false;
+        buttonDisplay = "Recording...";
+        isDisabled = true;
         break;
       }
       case AudioState.Ready: {
