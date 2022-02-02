@@ -23,7 +23,7 @@ var constraints: AudioDevice = {
   },
 };
 
-const RECORD_MS_TIME = 5000;
+const RECORD_MS_TIME = 1000;
 
 const handleStart = (event: Event) => {
   setTimeout(function () {
@@ -42,7 +42,6 @@ const handleDataAvailable = (event: BlobEvent) => {
   event.data.arrayBuffer().then((arrayBuf) => {
     audioCtx.decodeAudioData(arrayBuf).then((buffer) => { //sample rate is 48kHz for my device
       const float32Array = buffer.getChannelData(0); // get a single channel of sound
-	  console.log(float32Array);
       electron.ipcRenderer.send("process-audio", float32Array);
       const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
       writeSerial(data).then((status) => {

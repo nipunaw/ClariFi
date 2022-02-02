@@ -2,9 +2,7 @@
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
-const { GetPitchValue } = require("./main/audioProcess");
-var fft = require('fft-js').fft,
-    fftUtil = require('fft-js').util;
+const { GetPitchValue, fftAnalysis } = require("./main/audioProcess");
 
 function createWindow() {
   // Create the browser window.
@@ -64,14 +62,8 @@ function createWindow() {
 
   ipcMain.on("process-audio", (event, float32Array) => {
     const pitch = GetPitchValue(float32Array);
-	console.log(float32Array);
-	//var phasors= fft(float32Array.slice(0, 131071));
-	//console.log(phasors);
-	//var frequencies = fftUtil.fftFreq(phasors, 48384), // Sample rate and coef is just used for length, and frequency step
-	//	magnitudes = fftUtil.fftMag(phasors);
-	//console.log(frequencies);
-	//console.log(magnitudes);
-    console.log(`Value: ${pitch}`);
+    fftAnalysis(float32Array);
+    
     win.webContents.send(
       "audio-finished",
       `Sent information over UART if connected`
