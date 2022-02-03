@@ -9,13 +9,15 @@ const fftAnalysis = (arrayData) => {
     var frequencies = fftUtil.fftFreq(phasors, 48000); // Sample rate and coef is just used for length, and frequency step
     var magnitudes = fftUtil.fftMag(phasors);
 
-    console.log(frequencies)
-    console.log(magnitudes)
+    firFilterTaps(frequencies, magnitudes)
 }
 
-const firFilterTaps = (frequencyData, magnitudeData) => {
-    console.log(frequencyData);
-    console.log(magnitudeData);
+const firFilterTaps = (frequencies, magnitudes) => {
+    for (let i = 0; i < frequencies.length; i++) {
+      if (magnitudes[i] > 0.10) {
+        console.log("Frequency (Hz): "+ frequencies[i] + ", Magnitude: "+ magnitudes[i])
+      }
+    }
 }
 
 const GetPitchValue = (arrayData) => {
