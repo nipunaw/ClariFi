@@ -60,9 +60,9 @@ function createWindow() {
     }
   );
 
-  ipcMain.on("process-audio", (event, float32Array) => {
-    const pitch = GetPitchValue(float32Array);
-    fftAnalysis(float32Array);
+  ipcMain.on("process-audio", (event, recordedData, sampleRate) => {
+    const pitch = GetPitchValue(recordedData);
+    fftAnalysis(recordedData, sampleRate);
     
     win.webContents.send(
       "audio-finished",
