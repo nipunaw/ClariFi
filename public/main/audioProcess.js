@@ -4,19 +4,27 @@ const fft = require('fft-js').fft;
 const fftUtil = require('fft-js').util;
 
 const fftAnalysis = (recordedData, sampleRate) => {
-  console.log("Sample Rate: " + sampleRate);
-    console.log("Length of array: " + recordedData.length);
-    var phasors = fft(recordedData.slice(0, 32768)); // 48000 > samples 
-    console.log("Length of phasors: " + phasors.length);
+    
+    var phasors = fft(recordedData.slice(0, 262144)); // 48000 > samples 
     var frequencies = fftUtil.fftFreq(phasors, sampleRate); // Sample rate and coef is just used for length, and frequency step
     var magnitudes = fftUtil.fftMag(phasors);
 
+    console.log("Sample Rate: " + sampleRate);
+    console.log("Length of array: " + recordedData.length);
+    console.log("Length of phasors: " + phasors.length);
+    console.log("Length of frequencies: " + frequencies.length);
+    console.log("Length of magnitudes: " + magnitudes.length);
+    console.log("");
     firFilterTaps(frequencies, magnitudes)
+
 }
 
 const firFilterTaps = (frequencies, magnitudes) => {
+    const magnitudesDescending = [...magnitudes].sort(function (a, b) {  return a - b;  }).reverse();
+    const magnitudesThreshold = magnitudesDescending[10];
+
     for (let i = 0; i < frequencies.length; i++) {
-      if (magnitudes[i] > 0.3) {
+      if (magnitudes[i] > magnitudesThreshold) {
         console.log("Frequency (Hz): "+ frequencies[i] + ", Magnitude: "+ magnitudes[i])
       }
     }

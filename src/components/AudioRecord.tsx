@@ -23,7 +23,7 @@ var constraints: AudioDevice = {
   },
 };
 
-const RECORD_MS_TIME = 700;
+const RECORD_MS_TIME = 6000;
 
 const handleStart = (event: Event) => {
   setTimeout(function () {
