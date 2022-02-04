@@ -18,19 +18,20 @@ const fftAnalysis = (rawRecordedData, sampleRate) => {
   console.log("Length of frequencies: " + frequencies.length);
   console.log("Length of magnitudes: " + magnitudes.length);
   console.log("");
-  firFilterTaps(frequencies, magnitudes);
+  firFilterTaps(frequencies, magnitudes, sampleRate);
 }
 
-const firFilterTaps = (frequencies, magnitudes) => {
+const firFilterTaps = (frequencies, magnitudes, sampleRate) => {
   noiseRemoval(frequencies, magnitudes);
   var firCalculator = new Fili.FirCoeffs();
-  var firFilterCoeffs = firCalculator.lowpass({
-    order: 100, // filter order
-    Fs: 1000, // sampling frequency
-    Fc: 100 // cutoff frequency
-    // forbandpass and bandstop F1 and F2 must be provided instead of Fc
+  var firFilterCoeffsK = firCalculator.kbFilter({
+    order: 101, // filter order (must be odd)
+    Fs: sampleRate, // sampling frequency
+    Fa: 100, // rise, 0 for lowpass
+    Fb: 200, // fall, Fs/2 for highpass
+    Att: 20 // attenuation in dB
   });
-  console.log(firFilterCoeffs);
+
 }
 
 const noiseRemoval = (frequencies, magnitudes) => {
@@ -41,7 +42,7 @@ const noiseRemoval = (frequencies, magnitudes) => {
     }
   }
   const magnitudesNoiseDescending = [...magnitudes.slice(0, noiseLength)].sort(function (a, b) {  return a - b;  }).reverse();
-  const magnitudesNoiseThreshold = magnitudesNoiseDescending[20];
+  const magnitudesNoiseThreshold = magnitudesNoiseDescending[10];
   for (let i = 0; i < noiseLength; i++) {
     if (magnitudes[i] > magnitudesNoiseThreshold) {
       console.log("Noise Frequency (Hz): "+ frequencies[i] + ", Noise Magnitude: "+ magnitudes[i])
