@@ -61,6 +61,7 @@ function createWindow() {
     }
   );
 
+
   ipcMain.on("process-audio", (event, rawRecordedData, sampleRate) => {
     //Pitch method is deprecated
     try {
