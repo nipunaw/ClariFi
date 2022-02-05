@@ -1,14 +1,38 @@
+import { useState } from "react";
 import "../css/MainContent.css";
 // import MainContent from "./MainContent";
 import AudioRecord from "./AudioRecord";
+import NoiseInfoPrompt from "./NoiseInfoPrompt";
 // const electron = window.require("electron");
 
+enum ContentState {
+  NoiseInfo,
+  NoiseRecording,
+}
+
 export default function ContentContainer() {
+  const [state, setState] = useState(ContentState.NoiseInfo);
+
+  const stateHandler = () => {
+    switch (state) {
+      case ContentState.NoiseInfo: {
+        setState(ContentState.NoiseRecording);
+      }
+    }
+  };
+
+  const getContent = (): JSX.Element => {
+    switch (state) {
+      case ContentState.NoiseInfo:
+        return <NoiseInfoPrompt advanceState={stateHandler} />;
+      case ContentState.NoiseRecording:
+        return <AudioRecord />;
+    }
+  };
+
   return (
     <div className="inner-container">
-      <div className="overflow-content">
-        <AudioRecord />
-      </div>
+      <div className="overflow-content">{getContent()}</div>
     </div>
   );
 }
