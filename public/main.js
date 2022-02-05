@@ -2,6 +2,7 @@
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
+const { electron } = require("process");
 const { GetPitchValue, fftAnalysis } = require("./main/audioProcess");
 
 function createWindow() {
@@ -61,12 +62,14 @@ function createWindow() {
   );
 
   ipcMain.on("process-audio", (event, rawRecordedData, sampleRate) => {
+    //Pitch method is deprecated
     const pitch = GetPitchValue(rawRecordedData);
-    fftAnalysis(rawRecordedData, sampleRate);
+    const noiseTaps = fftAnalysis(rawRecordedData, sampleRate);
     
     win.webContents.send(
       "audio-finished",
-      `Sent information over UART if connected`
+      `Sent information over UART if connected`,
+       noiseTaps
     );
   });
 }

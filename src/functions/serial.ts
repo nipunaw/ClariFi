@@ -5,7 +5,7 @@ const getPort = async () => {
   return port;
 };
 
-const writeData = async (port: any, data: Uint8Array): Promise<boolean> => {
+const writeData = async (port: any, data: Float32Array): Promise<boolean> => {
   try {
     const writer = port.writable.getWriter();
     writer.write(data);
@@ -18,7 +18,7 @@ const writeData = async (port: any, data: Uint8Array): Promise<boolean> => {
   }
 };
 
-export const writeSerial = async (data: Uint8Array): Promise<boolean> => {
+export const writeSerial = async (data: Float32Array): Promise<boolean> => {
   try {
     const port = await getPort();
     const status = await writeData(port, data);

@@ -23,14 +23,15 @@ const fftAnalysis = (rawRecordedData, sampleRate) => {
   console.log("Length of frequencies: " + frequencies.length);
   console.log("Length of magnitudes: " + magnitudes.length);
   console.log("");
-  firFilterTaps(frequencies, magnitudes, sampleRate);
+  return firFilterTaps(frequencies, magnitudes, sampleRate);
 }
 
 const firFilterTaps = (frequencies, magnitudes, sampleRate) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
   
-  noiseRemoval(frequencies, magnitudes, 101, sampleRate);
+  const noiseTaps = noiseRemoval(frequencies, magnitudes, 101, sampleRate);
+  return noiseTaps;
 }
 
 const identifyPeaks = (magnitudes, mpdVal) => {

@@ -44,10 +44,11 @@ const handleDataAvailable = (event: BlobEvent) => {
       const rawRecordedData = buffer.getChannelData(0); // get a single channel of sound
       const sampleRate = audioCtx.sampleRate
       electron.ipcRenderer.send("process-audio", rawRecordedData, sampleRate);
-      const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
-      writeSerial(data).then((status) => {
-        console.log(status);
-      });
+      // Moved serial writing to electron.ipcRender.on:
+      // const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
+      // writeSerial(data).then((status) => {
+      //   console.log(status);
+      // });
     });
   });
 };
@@ -59,9 +60,12 @@ export default function AudioRecord() {
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>();
 
   useEffect(() => {
-    electron.ipcRenderer.on("audio-finished", (event, message) => {
+    electron.ipcRenderer.on("audio-finished", (event, message, data) => {
       setState(AudioState.Ready);
       setFeedbackMsg(message);
+      writeSerial(data).then((status) => {
+        console.log(status);
+      });
     });
   }, []);
 
