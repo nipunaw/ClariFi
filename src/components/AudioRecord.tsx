@@ -167,8 +167,6 @@ export default function AudioRecord() {
       return "Processing...";
     } else if (state === AudioState.Recording) {
       return "Recording...";
-    } else if (state === AudioState.Finished) {
-      return "Audio test finished";
     } else if (state === AudioState.Error) {
       return "An error occured while performing test. Please try again.";
     }
