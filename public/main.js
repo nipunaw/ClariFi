@@ -2,7 +2,8 @@
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
-const { GetPitchValue } = require("./main/audioProcess");
+const { electron } = require("process");
+const { GetPitchValue, fftAnalysis } = require("./main/audioProcess");
 
 function createWindow() {
   // Create the browser window.
@@ -60,13 +61,27 @@ function createWindow() {
     }
   );
 
-  ipcMain.on("process-audio", (event, float32Array) => {
-    const pitch = GetPitchValue(float32Array);
-    console.log(`Value: ${pitch}`);
-    win.webContents.send(
-      "audio-finished",
-      `Sent data over UART if FPGA is connected`
-    );
+
+  ipcMain.on("process-audio", (event, rawRecordedData, sampleRate) => {
+    //Pitch method is deprecated
+    try {
+      const pitch = GetPitchValue(rawRecordedData);
+      const noiseTaps = fftAnalysis(rawRecordedData, sampleRate);
+
+      win.webContents.send(
+        "audio-finished",
+        true,
+        `Sent information over UART if connected`,
+        noiseTaps
+      );
+    } catch {
+      win.webContents.send(
+        "audio-finished",
+        false,
+        `An error has occured.`,
+        []
+      );
+    }
   });
 }
 

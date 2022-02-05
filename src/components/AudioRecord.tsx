@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 import "../css/MainContent.css";
 import AudioDeviceList from "./AudioDeviceList";
 import { writeSerial } from "functions/serial";
+import Loading from "./Loading";
 const electron = window.require("electron");
 
 enum AudioState {
-  Loading,
-  Recording,
-  Ready,
   Idle,
+  Ready,
+  Recording,
+  Processing,
+  Error,
+  Finished,
 }
 
 interface AudioDevice extends MediaStreamConstraints {
@@ -23,39 +26,68 @@ var constraints: AudioDevice = {
   },
 };
 
+const RECORD_MS_TIME = 5500;
+
+const handleStart = (event: Event) => {
+  setTimeout(function () {
+    let eventRecorder = event.target as MediaRecorder;
+    eventRecorder.stop();
+  }, RECORD_MS_TIME);
+};
+
+const handleStop = (setRecorderState: () => void, updateState: () => void) => {
+  setRecorderState();
+  updateState();
+};
+
 const handleDataAvailable = (event: BlobEvent) => {
   let audioCtx = new AudioContext();
   event.data.arrayBuffer().then((arrayBuf) => {
     audioCtx.decodeAudioData(arrayBuf).then((buffer) => {
-      const float32Array = buffer.getChannelData(0); // get a single channel of sound
-      electron.ipcRenderer.send("process-audio", float32Array);
-      const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
-      writeSerial(data);
+      //sample rate is 48kHz for my device
+      const rawRecordedData = buffer.getChannelData(0); // get a single channel of sound
+      const sampleRate = audioCtx.sampleRate;
+      electron.ipcRenderer.send("process-audio", rawRecordedData, sampleRate);
     });
   });
 };
 
 export default function AudioRecord() {
-  //const audioRef = useRef<HTMLAudioElement>(null);
   const [state, setState] = useState<AudioState>(AudioState.Idle);
-  const [mediaStream, setMediaStream] = useState<MediaStream>();
   const [recorder, setRecorder] = useState<MediaRecorder>();
   const [selectedDevice, setSelectedDevice] = useState<MediaDeviceInfo>();
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>();
 
   useEffect(() => {
-    electron.ipcRenderer.on("audio-finished", (event, message) => {
-      setState(AudioState.Ready);
-      setFeedbackMsg(message);
-    });
+    electron.ipcRenderer.on(
+      "audio-finished",
+      (event, status, message, data) => {
+        console.log(status);
+        if (status === true) {
+          setState(AudioState.Finished);
+          setFeedbackMsg(message);
+          writeSerial(data).then((serialStatus) => {
+            console.log(serialStatus);
+          });
+        } else {
+          setState(AudioState.Error);
+        }
+      }
+    );
   }, []);
 
   function handleSuccess(stream: MediaStream) {
-    setMediaStream(stream);
     const options = { mimeType: "audio/webm" };
     const _recorder = new MediaRecorder(stream, options);
+    _recorder.onstart = handleStart;
+    _recorder.onstop = () =>
+      handleStop(
+        () => setRecorder(undefined),
+        () => setState(AudioState.Processing)
+      );
+    _recorder.ondataavailable = handleDataAvailable;
+    _recorder.start();
     setRecorder(_recorder);
-    //audioRef.current.srcObject = stream;
   }
 
   function handleError(error: Error) {
@@ -73,13 +105,6 @@ export default function AudioRecord() {
     }
   }, [selectedDevice]);
 
-  useEffect(() => {
-    if (recorder) {
-      recorder.ondataavailable = handleDataAvailable;
-      recorder.start();
-    }
-  }, [recorder]);
-
   const handleClick = () => {
     if (state === AudioState.Ready && selectedDevice) {
       setFeedbackMsg(null);
@@ -89,15 +114,6 @@ export default function AudioRecord() {
         .getUserMedia(constraints)
         .then(handleSuccess)
         .catch(handleError);
-    } else if (state === AudioState.Recording) {
-      setState(AudioState.Loading);
-      if (recorder) {
-        recorder.stop();
-        setRecorder(undefined);
-      }
-      if (mediaStream) {
-        setMediaStream(undefined);
-      }
     }
   };
 
@@ -112,8 +128,8 @@ export default function AudioRecord() {
         break;
       }
       case AudioState.Recording: {
-        buttonDisplay = "Click to Stop";
-        isDisabled = false;
+        buttonDisplay = "Recording...";
+        isDisabled = true;
         break;
       }
       case AudioState.Ready: {
@@ -121,9 +137,20 @@ export default function AudioRecord() {
         isDisabled = false;
         break;
       }
-      case AudioState.Loading: {
+      case AudioState.Processing: {
         buttonDisplay = "Processing...";
         isDisabled = true;
+        break;
+      }
+      case AudioState.Finished: {
+        buttonDisplay = "Finished";
+        isDisabled = true;
+        break;
+      }
+      case AudioState.Error: {
+        buttonDisplay = "Error";
+        isDisabled = true;
+        break;
       }
     }
     return (
@@ -136,10 +163,12 @@ export default function AudioRecord() {
   const getStateMessage = (): string | null => {
     if (state === AudioState.Idle) {
       return "Please select an audio device";
-    } else if (state === AudioState.Loading) {
+    } else if (state === AudioState.Processing) {
       return "Processing...";
     } else if (state === AudioState.Recording) {
       return "Recording...";
+    } else if (state === AudioState.Error) {
+      return "An error occured while performing test. Please try again.";
     }
     return null;
   };
@@ -150,12 +179,11 @@ export default function AudioRecord() {
         {getStateMessage()}
         {feedbackMsg}
       </div>
-      <AudioDeviceList selectDevice={setSelectedDevice} />
-      {/*
-      <div className="media-player">
-        <audio id="gum-local" ref={audioRef} controls autoPlay></audio>
-      </div>
-      */}
+      {state == AudioState.Recording || state == AudioState.Processing ? (
+        <Loading />
+      ) : (
+        <AudioDeviceList selectDevice={setSelectedDevice} />
+      )}
       {getButton()}
     </div>
   );
