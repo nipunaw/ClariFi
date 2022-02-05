@@ -63,14 +63,18 @@ function createWindow() {
 
   ipcMain.on("process-audio", (event, rawRecordedData, sampleRate) => {
     //Pitch method is deprecated
-    const pitch = GetPitchValue(rawRecordedData);
-    const noiseTaps = fftAnalysis(rawRecordedData, sampleRate);
-    
-    win.webContents.send(
-      "audio-finished",
-      `Sent information over UART if connected`,
-       noiseTaps
-    );
+    try {
+      const pitch = GetPitchValue(rawRecordedData);
+      const noiseTaps = fftAnalysis(rawRecordedData, sampleRate);
+
+      win.webContents.send(
+        "audio-finished",
+        `Sent information over UART if connected`,
+        noiseTaps
+      );
+    } catch {
+      win.webContents.send("audio-finished", `An error has occured.`, []);
+    }
   });
 }
 
