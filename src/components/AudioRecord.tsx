@@ -6,10 +6,12 @@ import Loading from "./Loading";
 const electron = window.require("electron");
 
 enum AudioState {
-  Loading,
-  Recording,
-  Ready,
   Idle,
+  Ready,
+  Recording,
+  Processing,
+  Error,
+  Finished,
 }
 
 interface AudioDevice extends MediaStreamConstraints {
@@ -57,13 +59,21 @@ export default function AudioRecord() {
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>();
 
   useEffect(() => {
-    electron.ipcRenderer.on("audio-finished", (event, message, data) => {
-      setState(AudioState.Ready);
-      setFeedbackMsg(message);
-      writeSerial(data).then((status) => {
+    electron.ipcRenderer.on(
+      "audio-finished",
+      (event, status, message, data) => {
         console.log(status);
-      });
-    });
+        if (status === true) {
+          setState(AudioState.Finished);
+          setFeedbackMsg(message);
+          writeSerial(data).then((serialStatus) => {
+            console.log(serialStatus);
+          });
+        } else {
+          setState(AudioState.Error);
+        }
+      }
+    );
   }, []);
 
   function handleSuccess(stream: MediaStream) {
@@ -73,7 +83,7 @@ export default function AudioRecord() {
     _recorder.onstop = () =>
       handleStop(
         () => setRecorder(undefined),
-        () => setState(AudioState.Loading)
+        () => setState(AudioState.Processing)
       );
     _recorder.ondataavailable = handleDataAvailable;
     _recorder.start();
@@ -127,9 +137,20 @@ export default function AudioRecord() {
         isDisabled = false;
         break;
       }
-      case AudioState.Loading: {
+      case AudioState.Processing: {
         buttonDisplay = "Processing...";
         isDisabled = true;
+        break;
+      }
+      case AudioState.Finished: {
+        buttonDisplay = "Finished";
+        isDisabled = true;
+        break;
+      }
+      case AudioState.Error: {
+        buttonDisplay = "Error";
+        isDisabled = true;
+        break;
       }
     }
     return (
@@ -142,10 +163,14 @@ export default function AudioRecord() {
   const getStateMessage = (): string | null => {
     if (state === AudioState.Idle) {
       return "Please select an audio device";
-    } else if (state === AudioState.Loading) {
+    } else if (state === AudioState.Processing) {
       return "Processing...";
     } else if (state === AudioState.Recording) {
       return "Recording...";
+    } else if (state === AudioState.Finished) {
+      return "Audio test finished";
+    } else if (state === AudioState.Error) {
+      return "An error occured while performing test. Please try again.";
     }
     return null;
   };
@@ -156,7 +181,7 @@ export default function AudioRecord() {
         {getStateMessage()}
         {feedbackMsg}
       </div>
-      {state == AudioState.Recording ? (
+      {state == AudioState.Recording || state == AudioState.Processing ? (
         <Loading />
       ) : (
         <AudioDeviceList selectDevice={setSelectedDevice} />

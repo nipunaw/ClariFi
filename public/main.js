@@ -69,11 +69,17 @@ function createWindow() {
 
       win.webContents.send(
         "audio-finished",
+        true,
         `Sent information over UART if connected`,
         noiseTaps
       );
     } catch {
-      win.webContents.send("audio-finished", `An error has occured.`, []);
+      win.webContents.send(
+        "audio-finished",
+        false,
+        `An error has occured.`,
+        []
+      );
     }
   });
 }
