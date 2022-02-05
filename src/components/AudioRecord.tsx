@@ -40,15 +40,11 @@ const handleStop = (setRecorderState: () => void, updateState: () => void) => {
 const handleDataAvailable = (event: BlobEvent) => {
   let audioCtx = new AudioContext();
   event.data.arrayBuffer().then((arrayBuf) => {
-    audioCtx.decodeAudioData(arrayBuf).then((buffer) => { //sample rate is 48kHz for my device
+    audioCtx.decodeAudioData(arrayBuf).then((buffer) => {
+      //sample rate is 48kHz for my device
       const rawRecordedData = buffer.getChannelData(0); // get a single channel of sound
-      const sampleRate = audioCtx.sampleRate
+      const sampleRate = audioCtx.sampleRate;
       electron.ipcRenderer.send("process-audio", rawRecordedData, sampleRate);
-      // Moved serial writing to electron.ipcRender.on:
-      // const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
-      // writeSerial(data).then((status) => {
-      //   console.log(status);
-      // });
     });
   });
 };
