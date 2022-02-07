@@ -1,9 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 
-interface ProfileState {}
+interface ProfileState {
+  currentProfileId: string | null;
+}
 
-const initialState: ProfileState = {};
+const initialState: ProfileState = {
+  currentProfileId: null,
+};
 
 export const profileSlice = createSlice({
   name: "profile",
