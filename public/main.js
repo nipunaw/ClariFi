@@ -61,7 +61,6 @@ function createWindow() {
     }
   );
 
-
   ipcMain.on("process-audio", (event, rawRecordedData, sampleRate) => {
     //Pitch method is deprecated
     try {
@@ -74,7 +73,8 @@ function createWindow() {
         `Sent information over UART if connected`,
         noiseTaps
       );
-    } catch {
+    } catch (e) {
+      console.log(e);
       win.webContents.send(
         "audio-finished",
         false,
