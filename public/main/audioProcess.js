@@ -8,9 +8,9 @@ const Fili = require('fili');
 // Smoothing and Plots
 const smoothed_z_score = require("@joe_six/smoothed-z-score-peak-signal-detection");
 const detect_peaks = require("@joe_six/duarte-watanabe-peak-detection")
-const { plot, Plot } = require("nodeplotlib");
+const { plot, Plot} = require("nodeplotlib");
 
-const fftAnalysis = (rawRecordedData, sampleRate) => {
+const fftAnalysis = (rawRecordedData, sampleRate, fftData) => {
   var windowedRecordedData = windowing.hann(rawRecordedData);
   var phasors = fft(windowedRecordedData.slice(0, 262144)); // 48000 > samples 
   var frequencies = fftUtil.fftFreq(phasors, sampleRate); // Sample rate and coef is just used for length, and frequency step
@@ -23,13 +23,14 @@ const fftAnalysis = (rawRecordedData, sampleRate) => {
   console.log("Length of frequencies: " + frequencies.length);
   console.log("Length of magnitudes: " + magnitudes.length);
   console.log("");
+  console.log(fftData);
   return firFilterTaps(frequencies, magnitudes, sampleRate);
 }
 
 const firFilterTaps = (frequencies, magnitudes, sampleRate) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
-  
+  //graphFrequencies(frequencies, magnitudes, true, 'scatter');
   const noiseTaps = noiseRemoval(frequencies, magnitudes, 101, sampleRate);
   return noiseTaps;
 }
@@ -94,6 +95,8 @@ const noiseRemoval = (frequencies, magnitudes, filterOrder, sampleRate) => {
   }
 
   // Safely assume independence of bands
+  // TO-DO: Handle edge case where bands is empty
+  console.log(noisyFrequencies);
   var sum = (r, a) => r.map((b, i) => a[i] + b);
   let noisyTaps = bands.reduce(sum);
 

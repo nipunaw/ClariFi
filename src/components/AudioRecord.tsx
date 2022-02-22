@@ -5,6 +5,13 @@ import { writeSerial } from "functions/serial";
 import Loading from "./Loading";
 const electron = window.require("electron");
 
+
+const audioCtx = new AudioContext();
+var analyser = audioCtx.createAnalyser();
+analyser.fftSize = 32768;
+var source;
+
+
 enum AudioState {
   Idle,
   Ready,
@@ -45,9 +52,14 @@ const handleDataAvailable = (event: BlobEvent) => {
   event.data.arrayBuffer().then((arrayBuf) => {
     audioCtx.decodeAudioData(arrayBuf).then((buffer) => {
       //sample rate is 48kHz for my device
+
+      let bufferLength = analyser.fftSize;
+      const fftData = new Float32Array(bufferLength);
+      analyser.getFloatFrequencyData(fftData);
+
       const rawRecordedData = buffer.getChannelData(0); // get a single channel of sound
       const sampleRate = audioCtx.sampleRate;
-      electron.ipcRenderer.send("process-audio", rawRecordedData, sampleRate);
+      electron.ipcRenderer.send("process-audio", rawRecordedData, sampleRate, fftData);
     });
   });
 };
@@ -77,6 +89,9 @@ export default function AudioRecord() {
   }, []);
 
   function handleSuccess(stream: MediaStream) {
+    source = audioCtx.createMediaStreamSource(stream);
+    source.connect(analyser);
+
     const options = { mimeType: "audio/webm" };
     const _recorder = new MediaRecorder(stream, options);
     _recorder.onstart = handleStart;
