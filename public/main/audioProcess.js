@@ -23,14 +23,20 @@ const fftAnalysis = (rawRecordedData, sampleRate, fftData) => {
   console.log("Length of frequencies: " + frequencies.length);
   console.log("Length of magnitudes: " + magnitudes.length);
   console.log("");
-  console.log(fftData);
+
+  var fftFreq = [];
+  for (let i =0; i < fftData.length; i++) { //TO-DO: Update to treat as bins rather than discrete values
+    fftFreq.push((sampleRate/2)/(fftData.length)*i);
+    fftData[i] = Math.round(Math.abs(fftData[i]));
+  }
+  graphFrequencies(fftFreq, fftData, false, true, 750, 32768, 'scatter');
   return firFilterTaps(frequencies, magnitudes, sampleRate);
 }
 
 const firFilterTaps = (frequencies, magnitudes, sampleRate) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
-  //graphFrequencies(frequencies, magnitudes, true, 'scatter');
+  graphFrequencies(frequencies, magnitudes, false, true, 750, 262144, 'scatter');
   const noiseTaps = noiseRemoval(frequencies, magnitudes, 101, sampleRate);
   return noiseTaps;
 }
@@ -42,20 +48,32 @@ const identifyPeaks = (magnitudes, mpdVal) => {
 }
 
 // Helper function for graphing/testing
-const graphFrequencies= (frequencies, magnitudes, logScale, plotType) => {
-  let logFrequencies = [];
+const graphFrequencies= (frequencies, magnitudes, logScale, limitLower, limitVal, fftSize, plotType) => {
+  let graphFrequencies = [];
+  let graphMagnitudes = [];
   if (logScale == true) {
     for (let i = 0; i < frequencies.length; i++) {
-      logFrequencies.push(Math.log10(frequencies[i]));
+      graphFrequencies.push(Math.log10(frequencies[i]));
+      graphMagnitudes.push(20*Math.log10((2*magnitudes[i])/fftSize)); 
+    }
+  } else if (limitLower == true) {
+    for (let i = 0; i < frequencies.length; i++) {
+      if (frequencies[i] < limitVal) {
+        graphFrequencies.push(frequencies[i]);
+        graphMagnitudes.push(20*Math.log10((2*magnitudes[i])/fftSize)); 
+      }
     }
   } else {
-    logFrequencies = frequencies;
+    for (let i = 0; i < frequencies.length; i++) {
+      graphFrequencies.push(frequencies[i]);
+      graphMagnitudes.push(20*Math.log10((2*magnitudes[i])/fftSize)); 
+    }
   }
   
   const data = [
     {
-      x: logFrequencies,
-      y: magnitudes,
+      x: graphFrequencies,
+      y: graphMagnitudes,
       type: plotType
     },
   ];

@@ -9,6 +9,7 @@ const electron = window.require("electron");
 const audioCtx = new AudioContext();
 var analyser = audioCtx.createAnalyser();
 analyser.fftSize = 32768;
+analyser.minDecibels = -200;
 var source;
 
 
@@ -54,8 +55,8 @@ const handleDataAvailable = (event: BlobEvent) => {
       //sample rate is 48kHz for my device
 
       let bufferLength = analyser.fftSize;
-      const fftData = new Float32Array(bufferLength);
-      analyser.getFloatFrequencyData(fftData);
+      const fftData = new Uint8Array(bufferLength);
+      analyser.getByteFrequencyData(fftData);
 
       const rawRecordedData = buffer.getChannelData(0); // get a single channel of sound
       const sampleRate = audioCtx.sampleRate;
@@ -124,6 +125,7 @@ export default function AudioRecord() {
     if (state === AudioState.Ready && selectedDevice) {
       setFeedbackMsg(null);
       setState(AudioState.Recording);
+      // TO-DO: Potentially wait after click to ensure it's not part of the frequencies
       constraints.audio.deviceId = selectedDevice.deviceId;
       navigator.mediaDevices
         .getUserMedia(constraints)
