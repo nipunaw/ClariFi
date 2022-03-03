@@ -10,16 +10,17 @@ const smoothed_z_score = require("@joe_six/smoothed-z-score-peak-signal-detectio
 const detect_peaks = require("@joe_six/duarte-watanabe-peak-detection")
 const { plot, Plot} = require("nodeplotlib");
 
-const fftAnalysis = (rawRecordedData, sampleRate, fftData) => {
-  var windowedRecordedData = windowing.hann(rawRecordedData);
-  var phasors = fft(windowedRecordedData.slice(0, 262144)); // 48000 > samples 
-  var frequencies = fftUtil.fftFreq(phasors, sampleRate); // Sample rate and coef is just used for length, and frequency step
-  var magnitudes = fftUtil.fftMag(phasors);
+const fftAnalysis = (rawData, sampleRate, fftData) => {
+  var N = 32768
+  var win = windowing.hann(rawData.slice(0, N));
+  var spectrum = fft(win); // 48000 > samples 
+  var frequencies = fftUtil.fftFreq(spectrum, sampleRate); // Sample rate and coef is just used for length, and frequency step
+  var magnitudes = fftUtil.fftMag(spectrum);
 
   console.log("Sample Rate: " + sampleRate);
-  console.log("Length of raw data: " + rawRecordedData.length);
-  console.log("Length of windowed data: " + windowedRecordedData.length);
-  console.log("Length of phasors: " + phasors.length);
+  console.log("Length of raw data: " + rawData.length);
+  console.log("Length of windowed data: " + win.length);
+  console.log("Length of phasors: " + spectrum.length);
   console.log("Length of frequencies: " + frequencies.length);
   console.log("Length of magnitudes: " + magnitudes.length);
   console.log("");
@@ -29,14 +30,14 @@ const fftAnalysis = (rawRecordedData, sampleRate, fftData) => {
     fftFreq.push((sampleRate/2)/(fftData.length)*i);
     fftData[i] = Math.round(Math.abs(fftData[i]));
   }
-  graphFrequencies(fftFreq, fftData, false, true, 750, 32768, 'scatter');
+  graphFrequencies(fftFreq, fftData, false, true, 2000, 32768, 'scatter');
   return firFilterTaps(frequencies, magnitudes, sampleRate);
 }
 
 const firFilterTaps = (frequencies, magnitudes, sampleRate) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
-  graphFrequencies(frequencies, magnitudes, false, true, 750, 262144, 'scatter');
+  graphFrequencies(frequencies, magnitudes, false, true, 2000, 32768, 'scatter');
   const noiseTaps = noiseRemoval(frequencies, magnitudes, 101, sampleRate);
   return noiseTaps;
 }
