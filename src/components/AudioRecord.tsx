@@ -9,7 +9,6 @@ const electron = window.require("electron");
 const audioCtx = new AudioContext();
 var analyser = audioCtx.createAnalyser();
 analyser.fftSize = 32768;
-analyser.minDecibels = -200;
 var source;
 
 
@@ -54,9 +53,9 @@ const handleDataAvailable = (event: BlobEvent) => {
     audioCtx.decodeAudioData(arrayBuf).then((buffer) => {
       //sample rate is 48kHz for my device
 
-      let bufferLength = analyser.fftSize;
-      const fftData = new Uint8Array(bufferLength);
-      analyser.getByteFrequencyData(fftData);
+      let bufferLength = analyser.frequencyBinCount;
+      const fftData = new Float32Array(bufferLength);
+      analyser.getFloatFrequencyData(fftData);
 
       const rawRecordedData = buffer.getChannelData(0); // get a single channel of sound
       const sampleRate = audioCtx.sampleRate;

@@ -11,12 +11,13 @@ const detect_peaks = require("@joe_six/duarte-watanabe-peak-detection")
 const { plot, Plot} = require("nodeplotlib");
 
 const fftAnalysis = (rawData, sampleRate, fftData) => {
-  var N = 32768
-  var win = windowing.hann(rawData.slice(0, N));
-  var spectrum = fft(win); // 48000 > samples 
-  var frequencies = fftUtil.fftFreq(spectrum, sampleRate); // Sample rate and coef is just used for length, and frequency step
-  var magnitudes = fftUtil.fftMag(spectrum);
+  let N = 32768;
+  let win = windowing.hann(rawData.slice(0, N), N); //rawData.slice(0, N), 
+  let spectrum = fft(win); // 48000 > samples 
+  let frequencies = fftUtil.fftFreq(spectrum, sampleRate); // Sample rate and coef is just used for length, and frequency step
+  let magnitudes = fftUtil.fftMag(spectrum);
 
+  console.log("##### META-DATA ON FFT-JS #####");
   console.log("Sample Rate: " + sampleRate);
   console.log("Length of raw data: " + rawData.length);
   console.log("Length of windowed data: " + win.length);
@@ -25,19 +26,20 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
   console.log("Length of magnitudes: " + magnitudes.length);
   console.log("");
 
-  var fftFreq = [];
-  for (let i =0; i < fftData.length; i++) { //TO-DO: Update to treat as bins rather than discrete values
-    fftFreq.push((sampleRate/2)/(fftData.length)*i);
-    fftData[i] = Math.round(Math.abs(fftData[i]));
+  let fftFreq = new Float32Array(fftData.length);
+  for (let i = 0; i < fftData.length; i++) {
+    fftFreq[i] = i*((sampleRate/2)/(fftData.length));
   }
-  graphFrequencies(fftFreq, fftData, false, true, 2000, 32768, 'scatter');
+  
+  graphFrequencySpectrum(fftFreq, fftData, {title: "AnalyserNode Frequency Spectrum"}); //{"logFreq": true}
+  graphFrequencySpectrum(frequencies, magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
+
   return firFilterTaps(frequencies, magnitudes, sampleRate);
 }
 
 const firFilterTaps = (frequencies, magnitudes, sampleRate) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
-  graphFrequencies(frequencies, magnitudes, false, true, 2000, 32768, 'scatter');
   const noiseTaps = noiseRemoval(frequencies, magnitudes, 101, sampleRate);
   return noiseTaps;
 }
@@ -49,25 +51,40 @@ const identifyPeaks = (magnitudes, mpdVal) => {
 }
 
 // Helper function for graphing/testing
-const graphFrequencies= (frequencies, magnitudes, logScale, limitLower, limitVal, fftSize, plotType) => {
-  let graphFrequencies = [];
-  let graphMagnitudes = [];
-  if (logScale == true) {
-    for (let i = 0; i < frequencies.length; i++) {
-      graphFrequencies.push(Math.log10(frequencies[i]));
-      graphMagnitudes.push(20*Math.log10((2*magnitudes[i])/fftSize)); 
-    }
-  } else if (limitLower == true) {
-    for (let i = 0; i < frequencies.length; i++) {
-      if (frequencies[i] < limitVal) {
-        graphFrequencies.push(frequencies[i]);
-        graphMagnitudes.push(20*Math.log10((2*magnitudes[i])/fftSize)); 
-      }
+const graphFrequencySpectrum=(frequencies, magnitudes, params={}) => {
+  
+  if (frequencies.length != magnitudes.length) {
+    console.log("Frequency bins length mismatches magnitude length")
+    return
+  }
+
+  let length = frequencies.length;
+  let logFreq = params["logFreq"] || false;
+  let scaleMagnitude = params["scaleMagnitude"] || false;
+  let fftSize = params["fftSize"] || 32768;
+  let title = params["title"] || "Frequency Spectrum";
+  let plotType = 'scatter';
+
+  let graphFrequencies = new Array(length);
+  let graphMagnitudes = new Array(length);
+
+  if (logFreq == true) {
+    for (let i = 0; i < length; i++) {
+      graphFrequencies[i] = Math.log10(frequencies[i]);
     }
   } else {
-    for (let i = 0; i < frequencies.length; i++) {
-      graphFrequencies.push(frequencies[i]);
-      graphMagnitudes.push(20*Math.log10((2*magnitudes[i])/fftSize)); 
+    for (let i = 0; i < length; i++) {
+      graphFrequencies[i] = frequencies[i];
+    }
+  }
+  
+  if (scaleMagnitude == true) {
+    for (let i = 0; i < length; i++) {
+      graphMagnitudes[i] = 20*Math.log10(2*magnitudes[i]/fftSize);
+    }
+  } else {
+    for (let i = 0; i < length; i++) {
+      graphMagnitudes[i] = magnitudes[i];
     }
   }
   
@@ -76,10 +93,14 @@ const graphFrequencies= (frequencies, magnitudes, logScale, limitLower, limitVal
       x: graphFrequencies,
       y: graphMagnitudes,
       type: plotType
-    },
+    }
   ];
+
+  const layout = {
+    title: title
+  };
   
-  plot(data);
+  plot(data, layout);
 }
 
 const bandstopTaps = (filterOrder, sampleRate, lowerFreq, upperFreq, attenuation) => {
