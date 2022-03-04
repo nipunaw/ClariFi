@@ -33,7 +33,6 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
   
   graphFrequencySpectrum(fftFreq, fftData, {title: "AnalyserNode Frequency Spectrum"}); //{"logFreq": true}
   graphFrequencySpectrum(frequencies, magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
-
   return firFilterTaps(frequencies, magnitudes, sampleRate);
 }
 
@@ -59,7 +58,7 @@ const graphFrequencySpectrum=(frequencies, magnitudes, params={}) => {
   }
 
   let length = frequencies.length;
-  let logFreq = params["logFreq"] || false;
+  let xaxisType = params["logFreq"] || "log";
   let scaleMagnitude = params["scaleMagnitude"] || false;
   let fftSize = params["fftSize"] || 32768;
   let title = params["title"] || "Frequency Spectrum";
@@ -68,14 +67,9 @@ const graphFrequencySpectrum=(frequencies, magnitudes, params={}) => {
   let graphFrequencies = new Array(length);
   let graphMagnitudes = new Array(length);
 
-  if (logFreq == true) {
-    for (let i = 0; i < length; i++) {
-      graphFrequencies[i] = Math.log10(frequencies[i]);
-    }
-  } else {
-    for (let i = 0; i < length; i++) {
-      graphFrequencies[i] = frequencies[i];
-    }
+
+  for (let i = 0; i < length; i++) {
+    graphFrequencies[i] = frequencies[i];
   }
   
   if (scaleMagnitude == true) {
@@ -97,7 +91,14 @@ const graphFrequencySpectrum=(frequencies, magnitudes, params={}) => {
   ];
 
   const layout = {
-    title: title
+    title: title,
+    xaxis: {
+      title: "Frequency [Hz]",
+      type: xaxisType
+    },
+    yaxis: {
+      title: "Magnitude [dBFS]"
+    }
   };
   
   plot(data, layout);
