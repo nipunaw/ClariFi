@@ -1,8 +1,10 @@
 import "css/MainContent.css";
+import { useAppDispatch } from "hooks";
+import { nextState } from "reducers/calibrateSlice";
 
-const NoiseInfoPrompt: React.FC<{
-  advanceState: () => any;
-}> = ({ advanceState }) => {
+const NoiseInfoPrompt: React.FC<{}> = () => {
+  const dispatch = useAppDispatch();
+
   return (
     <div className="main-content" style={{ wordBreak: "break-word" }}>
       <div className="display-message">Ambient Noise Assesment</div>
@@ -18,7 +20,7 @@ const NoiseInfoPrompt: React.FC<{
         and begin recording, which will last 5-6 seconds. Please remain
         completely quiet during this time.
       </div>
-      <button onClick={() => advanceState()}> Proceed</button>
+      <button onClick={() => dispatch(nextState())}> Proceed</button>
     </div>
   );
 };

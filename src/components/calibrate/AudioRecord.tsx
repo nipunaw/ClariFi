@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import "css/MainContent.css";
-import AudioDeviceList from "./AudioDeviceList";
 import { writeSerial } from "functions/serial";
 import Loading from "../Loading";
+import { useAppSelector } from "hooks";
+import { useAppDispatch } from "hooks";
+import { nextState, selectCalibrate } from "reducers/calibrateSlice";
 const electron = window.require("electron");
 
 enum AudioState {
-  Idle,
   Ready,
   Recording,
   Processing,
@@ -53,10 +54,11 @@ const handleDataAvailable = (event: BlobEvent) => {
 };
 
 export default function AudioRecord() {
-  const [state, setState] = useState<AudioState>(AudioState.Idle);
+  const [state, setState] = useState<AudioState>(AudioState.Ready);
   const [recorder, setRecorder] = useState<MediaRecorder>();
-  const [selectedDevice, setSelectedDevice] = useState<MediaDeviceInfo>();
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>();
+  const { deviceId } = useAppSelector(selectCalibrate);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     electron.ipcRenderer.on(
@@ -72,6 +74,7 @@ export default function AudioRecord() {
         } else {
           setState(AudioState.Error);
         }
+        setState(AudioState.Finished);
       }
     );
   }, []);
@@ -99,21 +102,17 @@ export default function AudioRecord() {
     console.log(errorMessage);
   }
 
-  useEffect(() => {
-    if (selectedDevice) {
-      setState(AudioState.Ready);
-    }
-  }, [selectedDevice]);
-
   const handleClick = () => {
-    if (state === AudioState.Ready && selectedDevice) {
+    if (state === AudioState.Ready && deviceId != null) {
       setFeedbackMsg(null);
       setState(AudioState.Recording);
-      constraints.audio.deviceId = selectedDevice.deviceId;
+      constraints.audio.deviceId = deviceId;
       navigator.mediaDevices
         .getUserMedia(constraints)
         .then(handleSuccess)
         .catch(handleError);
+    } else if (state === AudioState.Finished) {
+      dispatch(nextState());
     }
   };
 
@@ -122,19 +121,14 @@ export default function AudioRecord() {
     let isDisabled: boolean = true;
 
     switch (state) {
-      case AudioState.Idle: {
-        buttonDisplay = "Waiting";
-        isDisabled = true;
+      case AudioState.Ready: {
+        buttonDisplay = "Click to Start";
+        isDisabled = false;
         break;
       }
       case AudioState.Recording: {
         buttonDisplay = "Recording...";
         isDisabled = true;
-        break;
-      }
-      case AudioState.Ready: {
-        buttonDisplay = "Click to Start";
-        isDisabled = false;
         break;
       }
       case AudioState.Processing: {
@@ -143,8 +137,8 @@ export default function AudioRecord() {
         break;
       }
       case AudioState.Finished: {
-        buttonDisplay = "Finished";
-        isDisabled = true;
+        buttonDisplay = "Next";
+        isDisabled = false;
         break;
       }
       case AudioState.Error: {
@@ -161,17 +155,36 @@ export default function AudioRecord() {
   };
 
   const getStateMessage = (): string | null => {
-    if (state === AudioState.Idle) {
-      return "Please select an audio device";
+    if (state === AudioState.Ready) {
+      return "Click to begin test.";
     } else if (state === AudioState.Processing) {
       return "Processing...";
     } else if (state === AudioState.Recording) {
       return "Recording...";
+    } else if (state === AudioState.Finished) {
+      return "Finished processing audio. Please proceed!";
     } else if (state === AudioState.Error) {
       return "An error occured while performing test. Please try again.";
     }
     return null;
   };
+
+  const deviceSelected = (
+    <div
+      className="device-list"
+      style={{ minHeight: "300px", justifyContent: "normal" }}
+    >
+      <div
+        style={{
+          fontWeight: "600",
+          fontSize: "18px",
+        }}
+      >
+        DeviceId Selected:{" "}
+      </div>
+      {deviceId}
+    </div>
+  );
 
   return (
     <div className="main-content">
@@ -182,7 +195,7 @@ export default function AudioRecord() {
       {state == AudioState.Recording || state == AudioState.Processing ? (
         <Loading />
       ) : (
-        <AudioDeviceList selectDevice={setSelectedDevice} />
+        deviceSelected
       )}
       {getButton()}
     </div>

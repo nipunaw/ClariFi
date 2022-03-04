@@ -1,7 +1,7 @@
 .device-btn {
   display: flex;
   align-items: center;
-  height: 50px;
+  min-height: 50px;
   width: 100%;
   background-color: var(--white-color);
   color: var(--darker-color);
@@ -40,8 +40,9 @@
 }
 
 .display-message {
-  height: 50px;
+  min-height: 50px;
   font-size: 25px;
+  padding-bottom: 20px;
 }
 
 .media-player {

@@ -1,7 +1,9 @@
 export enum Calibrate {
   initalMenu,
   deviceConfig,
+  prompt1,
   audioTest1,
-  audioTest2,
+  //prompt2,
+  //audioTest2,
   process,
 }

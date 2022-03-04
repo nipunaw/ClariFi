@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import { Calibrate } from "enums/calibrate";
-import { stat } from "fs";
 
 interface CalibrateState {
   currentState: Calibrate;
@@ -24,15 +23,19 @@ export const calibrateSlice = createSlice({
           break;
         }
         case Calibrate.deviceConfig: {
+          state.currentState = Calibrate.prompt1;
+          break;
+        }
+        case Calibrate.prompt1: {
           state.currentState = Calibrate.audioTest1;
           break;
         }
         case Calibrate.audioTest1: {
-          state.currentState = Calibrate.audioTest2;
+          state.currentState = Calibrate.process;
           break;
         }
-        case Calibrate.audioTest2: {
-          state.currentState = Calibrate.process;
+        case Calibrate.process: {
+          state.currentState = Calibrate.initalMenu;
           break;
         }
       }
