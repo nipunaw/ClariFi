@@ -1,4 +1,7 @@
-// Generics
+const {
+  default: installExtension,
+  REDUX_DEVTOOLS,
+} = require("electron-devtools-installer");
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const { resolve } = require("path");
@@ -17,7 +20,7 @@ function createWindow() {
     },
   });
 
-  //load the index.html from a url
+  // Load the index.html from a url
   win.loadURL("http://localhost:3000");
 
   // Open the DevTools.
@@ -61,7 +64,6 @@ function createWindow() {
     }
   );
 
-
   ipcMain.on("process-audio", (event, rawRecordedData, sampleRate, fftData) => {
     try {
       //Pitch method is deprecated
@@ -74,7 +76,8 @@ function createWindow() {
         `Sent information over UART if connected`,
         noiseTaps
       );
-    } catch {
+    } catch (e) {
+      console.log(e);
       win.webContents.send(
         "audio-finished",
         false,
@@ -100,10 +103,12 @@ function readFile(filepath, mimeType) {
   });
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  installExtension(REDUX_DEVTOOLS)
+    .then((name) => console.log(`Added Extension:  ${name}`))
+    .catch((err) => console.log("An error occurred: ", err));
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
