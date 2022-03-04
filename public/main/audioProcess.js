@@ -5,6 +5,8 @@ const fft = require('fft-js').fft;
 const fftUtil = require('fft-js').util;
 const windowing = require('fft-windowing');
 const Fili = require('fili');
+var ft = require('fourier-transform');
+var db = require('decibels');
 // Smoothing and Plots
 const smoothed_z_score = require("@joe_six/smoothed-z-score-peak-signal-detection");
 const detect_peaks = require("@joe_six/duarte-watanabe-peak-detection")
@@ -16,6 +18,8 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
   let spectrum = fft(win); // 48000 > samples 
   let frequencies = fftUtil.fftFreq(spectrum, sampleRate); // Sample rate and coef is just used for length, and frequency step
   let magnitudes = fftUtil.fftMag(spectrum);
+  let spectrum2 = ft(rawData.slice(0, N));
+  let decibels = spectrum2.map((value) => db.fromGain(value))
 
   console.log("##### META-DATA ON FFT-JS #####");
   console.log("Sample Rate: " + sampleRate);
@@ -33,6 +37,7 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
   
   graphFrequencySpectrum(fftFreq, fftData, {title: "AnalyserNode Frequency Spectrum"}); //{"logFreq": true}
   graphFrequencySpectrum(frequencies, magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
+  graphFrequencySpectrum(frequencies, decibels, {title: "FFT-ASM Frequency Spectrum"});
   return firFilterTaps(frequencies, magnitudes, sampleRate);
 }
 
