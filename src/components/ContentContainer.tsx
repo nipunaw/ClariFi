@@ -2,31 +2,23 @@ import { useState } from "react";
 import "css/MainContent.css";
 import AudioRecord from "./calibrate/AudioRecord";
 import NoiseInfoPrompt from "./calibrate/NoiseInfoPrompt";
-// const electron = window.require("electron");
-
-enum ContentState {
-  NoiseInfo,
-  NoiseRecording,
-}
+import { useAppSelector } from "hooks";
+import { selectCalibrate } from "reducers/calibrateSlice";
+import DeviceConfigure from "./calibrate/DeviceConfigure";
+import { Calibrate } from "enums/calibrate";
 
 export default function ContentContainer() {
-  const [state, setState] = useState(ContentState.NoiseInfo);
+  const { currentState: calibrateState } = useAppSelector(selectCalibrate);
 
-  const stateHandler = () => {
-    switch (state) {
-      case ContentState.NoiseInfo: {
-        setState(ContentState.NoiseRecording);
-      }
-    }
-  };
-
-  const getContent = (): JSX.Element => {
-    switch (state) {
-      case ContentState.NoiseInfo:
-        return <NoiseInfoPrompt advanceState={stateHandler} />;
-      case ContentState.NoiseRecording:
+  const getContent = (): JSX.Element | null => {
+    switch (calibrateState) {
+      case Calibrate.deviceConfig:
+        return <DeviceConfigure />;
+      case Calibrate.audioTest1:
+      case Calibrate.audioTest2:
         return <AudioRecord />;
     }
+    return null;
   };
 
   return (
