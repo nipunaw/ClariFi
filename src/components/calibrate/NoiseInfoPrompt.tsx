@@ -1,4 +1,4 @@
-import "../css/MainContent.css";
+import "css/MainContent.css";
 
 const NoiseInfoPrompt: React.FC<{
   advanceState: () => any;
@@ -13,9 +13,10 @@ const NoiseInfoPrompt: React.FC<{
         }}
       >
         This recording test will assess the ambient noise in your current
-        enviornment. Please position your microphone to a desirable speaking position
-        before proceeding. On the next page, you can select your device and begin recording,
-        which will last 5-6 seconds. Please remain completely quiet during this time.
+        enviornment. Please position your microphone to a desirable speaking
+        position before proceeding. On the next page, you can select your device
+        and begin recording, which will last 5-6 seconds. Please remain
+        completely quiet during this time.
       </div>
       <button onClick={() => advanceState()}> Proceed</button>
     </div>

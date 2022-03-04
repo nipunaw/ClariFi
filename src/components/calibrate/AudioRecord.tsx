@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import "../css/MainContent.css";
+import "css/MainContent.css";
 import AudioDeviceList from "./AudioDeviceList";
 import { writeSerial } from "functions/serial";
-import Loading from "./Loading";
+import Loading from "../Loading";
 const electron = window.require("electron");
 
 enum AudioState {

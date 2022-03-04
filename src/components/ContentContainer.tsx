@@ -1,8 +1,7 @@
 import { useState } from "react";
-import "../css/MainContent.css";
-// import MainContent from "./MainContent";
-import AudioRecord from "./AudioRecord";
-import NoiseInfoPrompt from "./NoiseInfoPrompt";
+import "css/MainContent.css";
+import AudioRecord from "./calibrate/AudioRecord";
+import NoiseInfoPrompt from "./calibrate/NoiseInfoPrompt";
 // const electron = window.require("electron");
 
 enum ContentState {
