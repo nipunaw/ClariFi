@@ -64,11 +64,11 @@ function createWindow() {
     }
   );
 
-  ipcMain.on("process-audio", (event, rawRecordedData, sampleRate) => {
-    //Pitch method is deprecated
+  ipcMain.on("process-audio", (event, rawRecordedData, sampleRate, fftData) => {
     try {
-      const pitch = GetPitchValue(rawRecordedData);
-      const noiseTaps = fftAnalysis(rawRecordedData, sampleRate);
+      //Pitch method is deprecated
+      //const pitch = GetPitchValue(rawRecordedData);
+      const noiseTaps = fftAnalysis(rawRecordedData, sampleRate, fftData);
 
       win.webContents.send(
         "audio-finished",
