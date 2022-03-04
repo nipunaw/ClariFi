@@ -74,7 +74,6 @@ export default function AudioRecord() {
         } else {
           setState(AudioState.Error);
         }
-        setState(AudioState.Finished);
       }
     );
   }, []);
