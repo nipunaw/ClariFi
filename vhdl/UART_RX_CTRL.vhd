@@ -33,33 +33,36 @@ architecture BHV of UART_RX_CTRL is
   type state_type is (S_START, S_START_BIT, S_DATA_BITS, S_STOP_BIT, S_DONE);
   signal state : state_type := S_START;
  
-  signal r_UART_RX : std_logic := '0';
-  signal r_r_UART_RX   : std_logic := '0';
+  signal r_UART_RX : std_logic;
+  signal r_r_UART_RX   : std_logic;
    
   signal r_Bit_Counter : integer range 0 to CLKS_PER_BIT-1 := 0;
   signal r_Bit_Index : integer range 0 to 7 := 0;  -- 8 Bits Total
   signal r_RX_Byte   : std_logic_vector(7 downto 0) := (others => '0');
   signal r_RX_DONE     : std_logic := '0';
+  
+  signal r_In_Start : std_logic;
    
 begin 
-	process (CLK)
+	process (CLK, UART_RX, r_In_Start)
 	begin
+		if (falling_edge(UART_RX) and r_In_Start = '1') then
+			state <= S_START_BIT;
+		end if;
+		
 		if rising_edge(CLK) then
 			-- Dual-flop synchronizer to stabilize incoming signal (data)
 			r_UART_RX <= UART_RX;
 			r_r_UART_RX <= r_UART_RX;
-			 
+			r_In_Start <= '0';
+			
 		  case state is
 	 
 			when S_START =>
 			  r_RX_DONE     <= '0';
 			  r_Bit_Counter <= 0;
 			  r_Bit_Index <= 0;
-	 
-			  if (r_r_UART_RX = '0') then -- falling_edge(r_r_UART_RX) then -- Start bit transitioned from '1' to '0'
-				state <= S_START_BIT;
-			  end if;
-			  state <= S_START;
+			  r_In_Start <= '1';
 	 
 			-- Sample half bit later to make sure it's still low
 			when S_START_BIT =>

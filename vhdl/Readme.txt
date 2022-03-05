@@ -1,10 +1,7 @@
-[EQPhonic Team Members]
-Nipuna Weerapperuma, Leslie Harvey, Dylan Ferris, Carlos Morales-Diaz
-
-[Notes]
+Team Members: Nipuna Weerapperuma, Leslie Harvey, Dylan Ferris, Carlos Morales-Diaz
 This VHDL was written for an Artix-7 35T with Vivado and its IP library.
 
-[File Descriptions]
+File description:
 adc.vhd - An abstraction layer for controlling the current ADC chip (a TLC0820)
 BasicFIR.vhd - A configurable implementation for an FIR filter in the time domain
 ClkDivider.vhd - Divides a clock by a power of 2

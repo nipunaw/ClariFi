@@ -43,7 +43,6 @@ function createWindow() {
     ) {
       return true;
     }
-    return false;
   });
 
   win.webContents.session.on(
