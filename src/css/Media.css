@@ -43,6 +43,7 @@
   min-height: 50px;
   font-size: 25px;
   padding-bottom: 20px;
+  word-break: break-word;
 }
 
 .media-player {

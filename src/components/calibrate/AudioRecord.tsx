@@ -72,7 +72,7 @@ export default function AudioRecord() {
   const [state, setState] = useState<AudioState>(AudioState.Ready);
   const [recorder, setRecorder] = useState<MediaRecorder>();
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>();
-  const { deviceId } = useAppSelector(selectCalibrate);
+  const { deviceId, testName } = useAppSelector(selectCalibrate);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function AudioRecord() {
         console.log(status);
         if (status === true) {
           setState(AudioState.Finished);
-          setFeedbackMsg(message);
+          //setFeedbackMsg(message);
           writeSerial(data).then((serialStatus) => {
             console.log(serialStatus);
           });
@@ -174,7 +174,7 @@ export default function AudioRecord() {
 
   const getStateMessage = (): string | null => {
     if (state === AudioState.Ready) {
-      return "Start the test for the listed recording device.";
+      return `Start the ${testName} test for the listed recording device.`;
     } else if (state === AudioState.Processing) {
       return "Processing...";
     } else if (state === AudioState.Recording) {

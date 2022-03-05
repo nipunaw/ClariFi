@@ -5,11 +5,13 @@ import { Calibrate } from "enums/calibrate";
 interface CalibrateState {
   currentState: Calibrate;
   deviceId: string | null;
+  testName: string | null;
 }
 
 const initialState: CalibrateState = {
   currentState: Calibrate.deviceConfig,
   deviceId: null,
+  testName: null,
 };
 
 export const calibrateSlice = createSlice({
@@ -28,6 +30,7 @@ export const calibrateSlice = createSlice({
         }
         case Calibrate.prompt1: {
           state.currentState = Calibrate.audioTest1;
+          state.testName = "Ambient Noise";
           break;
         }
         case Calibrate.audioTest1: {
