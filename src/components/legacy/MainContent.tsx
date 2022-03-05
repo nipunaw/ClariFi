@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
-import "../css/MainContent.css";
+import "css/MainContent.css";
 const electron = window.require("electron");
 
 interface ImageInfo {
