@@ -44,7 +44,7 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
 const firFilterTaps = (frequencies, magnitudes, sampleRate) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
-  const noiseTaps = noiseRemoval(frequencies, magnitudes, 101, sampleRate);
+  const noiseTaps = noiseRemoval(frequencies, magnitudes, 101, sampleRate, 150);
   return noiseTaps;
 }
 
@@ -121,32 +121,34 @@ const bandstopTaps = (filterOrder, sampleRate, lowerFreq, upperFreq, attenuation
   return firFilterCoeffsK;
 }
 
-const noiseRemoval = (frequencies, magnitudes, filterOrder, sampleRate) => {
+const noiseRemoval = (frequencies, magnitudes, filterOrder, sampleRate, limit) => {
   const peaksWatanabeIndices = identifyPeaks(magnitudes, 50);
-  let noisyFrequencies = [];
+  let strongLowerFreq = [];
   for (let i = 0; i < peaksWatanabeIndices.length; i++) {
-    if (frequencies[peaksWatanabeIndices[i]] < 80) {
-      noisyFrequencies.push(Math.round(frequencies[peaksWatanabeIndices[i]]));
+    if (frequencies[peaksWatanabeIndices[i]] < limit) {
+      strongLowerFreq.push(Math.round(frequencies[peaksWatanabeIndices[i]]));
     }
   }
 
   
   let bands = [];
-  for (let i = 0; i < noisyFrequencies.length; i++) {
-    if (noisyFrequencies[i] > 5) {
-      bands.push(bandstopTaps(filterOrder, sampleRate, noisyFrequencies[i]-5, noisyFrequencies[i]+5, 5)); //Attenuate by 5 dB, order of 101
+  for (let i = 0; i < strongLowerFreq.length; i++) {
+    if (strongLowerFreq[i] > 5) { //Greater than 5Hz
+      bands.push(bandstopTaps(filterOrder, sampleRate, strongLowerFreq[i]-5, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 101
     } else {
-      bands.push(bandstopTaps(filterOrder, sampleRate, 0, noisyFrequencies[i]+5, 5)); //Attenuate by 5 dB, order of 101
+      bands.push(bandstopTaps(filterOrder, sampleRate, 0, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 101
     }
   }
 
-  // Safely assume independence of bands
-  // TO-DO: Handle edge case where bands is empty
-  console.log(noisyFrequencies);
-  var sum = (r, a) => r.map((b, i) => a[i] + b);
-  let noisyTaps = bands.reduce(sum);
-
-  return noisyTaps;
+  console.log(strongLowerFreq);
+  if (bands.length > 0) {
+    // Safely assume independence of bands
+    var sum = (r, a) => r.map((b, i) => a[i] + b);
+    let noisyTaps = bands.reduce(sum);
+    return noisyTaps;
+  }
+  return [];
+  
 }
 
 const generalAnalysis = (frequencies, magnitudes) => {

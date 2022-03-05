@@ -30,21 +30,21 @@ The HDL is synthesized by the Vivado 2021.1 build system. It has not been tested
 3. Double click on "Generate Bitstream" to generate the bitstream for the Arty A7-35 (xc7a35ticsg324-1L) FPGA, which is preconfigured. Other devices may be selected, however neither performance nor compatibility are guaranteed.
 
 The default pinout, which can also be found in the constraint file, is:
-clk - E3
-rst - C2
-sampleIn[0:7] -  D4,  D3,  F4,  F3,  E2,  D2,  H2,  G2
-sampleOut[0:7] - G13, B11, A11, D12, D13, B18, A18, K16
+- clk - E3
+- rst - C2
+- sampleIn[0:7] -  D4,  D3,  F4,  F3,  E2,  D2,  H2,  G2
+- sampleOut[0:7] - G13, B11, A11, D12, D13, B18, A18, K16
 
 For status of the filter on the Arty A7 devboard, it outputs to a status LED:
-filterActive - H5
+- filterActive - H5
 
 The switch on the devboard enables the filter
-filterEn - A8
+- filterEn - A8
 
 
 The pins for the TLC0820:
-extCS - E15
-extRD - E16
-extReady - D15
+- extCS - E15
+- extRD - E16
+- extReady - D15
 
 The MX7224 is held in transparent mode
