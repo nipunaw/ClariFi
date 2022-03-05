@@ -140,7 +140,7 @@ export default function AudioRecord() {
 
     switch (state) {
       case AudioState.Ready: {
-        buttonDisplay = "Click to Start";
+        buttonDisplay = "Begin recording";
         isDisabled = false;
         break;
       }
@@ -174,13 +174,13 @@ export default function AudioRecord() {
 
   const getStateMessage = (): string | null => {
     if (state === AudioState.Ready) {
-      return "Click to begin test.";
+      return "Start the test for the listed recording device.";
     } else if (state === AudioState.Processing) {
       return "Processing...";
     } else if (state === AudioState.Recording) {
       return "Recording...";
     } else if (state === AudioState.Finished) {
-      return "Finished processing audio. Please proceed!";
+      return "Finished processing audio. Please proceed to the next step. ";
     } else if (state === AudioState.Error) {
       return "An error occured while performing test. Please try again.";
     }

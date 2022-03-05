@@ -16,7 +16,7 @@ const NoiseInfoPrompt: React.FC<{}> = () => {
       >
         This recording test will assess the ambient noise in your current
         enviornment. Please position your microphone to a desirable speaking
-        position before proceeding. On the next page, you can select your device
+        position before proceeding. On the next page, you can review your selected device
         and begin recording, which will last 5-6 seconds. Please remain
         completely quiet during this time.
       </div>

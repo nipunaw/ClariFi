@@ -39,7 +39,7 @@ export default function DeviceConfigure() {
         break;
       }
       case AudioState.Ready: {
-        buttonDisplay = "Click to Start";
+        buttonDisplay = "Click to Proceed";
         isDisabled = false;
         break;
       }
@@ -53,7 +53,7 @@ export default function DeviceConfigure() {
 
   return (
     <div className="main-content">
-      <div className="display-message">{"Please select an audio device"}</div>
+      <div className="display-message">{"Please select a recording device from below:"}</div>
       <AudioDeviceList selectDevice={setSelectedDevice} />
       {getButton()}
     </div>

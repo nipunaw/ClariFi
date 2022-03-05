@@ -7,14 +7,14 @@ const Process: React.FC<{}> = () => {
 
   return (
     <div className="main-content" style={{ wordBreak: "break-word" }}>
-      <div className="display-message">Initalize FPGA</div>
+      <div className="display-message">ClariFi Filters</div>
       <div
         style={{
           marginTop: "15px",
           marginBottom: "20px",
         }}
       >
-        If connected, the recorded data will be sent via SPI to the FPGA.
+        If the ClariFi device is connected, the calculated filter taps have been transmitted via SPI to the FPGA. Thank you for using our application.
       </div>
     </div>
   );
