@@ -80,6 +80,10 @@
   "build": {
     "appId": "com.electron.clarifi",
     "productName": "ClariFi",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
     "win": {
       "target": "nsis-web"
     }

@@ -1,12 +1,16 @@
-const {
-  default: installExtension,
-  REDUX_DEVTOOLS,
-} = require("electron-devtools-installer");
+const { error } = require("console");
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const { electron } = require("process");
 const { GetPitchValue, fftAnalysis } = require("./main/audioProcess");
+
+var installExtension;
+var REDUX_DEVTOOLS;
+if (process.env.LOCAL) {
+  installExtension = require("electron-devtools-installer").default;
+  REDUX_DEVTOOLS = require("electron-devtools-installer").REDUX_DEVTOOLS;
+}
 
 function createWindow() {
   // Create the browser window.
@@ -107,10 +111,17 @@ function readFile(filepath, mimeType) {
 }
 
 app.whenReady().then(() => {
-  installExtension(REDUX_DEVTOOLS)
-    .then((name) => console.log(`Added Extension:  ${name}`))
-    .catch((err) => console.log("An error occurred: ", err));
-  createWindow();
+  if (process.env.LOCAL) {
+    installExtension(REDUX_DEVTOOLS)
+      .then((name) => console.log(`Added Extension:  ${name}`))
+      .catch((err) => console.log("An error occurred: ", err));
+  }
+
+  try {
+    createWindow();
+  } catch {
+    app.quit();
+  }
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

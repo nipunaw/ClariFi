@@ -10,7 +10,7 @@ var db = require("decibels");
 // Smoothing and Plots
 const smoothed_z_score = require("@joe_six/smoothed-z-score-peak-signal-detection");
 const detect_peaks = require("@joe_six/duarte-watanabe-peak-detection");
-const { plot, Plot } = require("nodeplotlib");
+//const { plot, Plot } = require("nodeplotlib");
 
 const fftAnalysis = (rawData, sampleRate, fftData) => {
   let N = 32768;
@@ -117,7 +117,7 @@ const graphFrequencySpectrum = (frequencies, magnitudes, params = {}) => {
     },
   };
 
-  plot(data, layout);
+  //plot(data, layout);
 };
 
 const bandstopTaps = (
