@@ -2,7 +2,7 @@
   "name": "clarifi",
   "version": "1.0.0",
   "description": "FPGA and software crossover to bring your microphone clarity and fidelity",
-  "main": "public/main.js",
+  "main": "public/electron.js",
   "dependencies": {
     "@joe_six/duarte-watanabe-peak-detection": "^0.2.0",
     "@joe_six/smoothed-z-score-peak-signal-detection": "^0.1.2",
@@ -33,12 +33,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron-dev": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "react-scripts build && electron-builder"
   },
   "eslintConfig": {
     "extends": [
@@ -78,6 +77,10 @@
     "appId": "com.electron.clarifi",
     "mac": {
       "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
     }
   }
 }
