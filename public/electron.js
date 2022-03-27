@@ -4,7 +4,7 @@ const {
 } = require("electron-devtools-installer");
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
-const { resolve } = require("path");
+const path = require("path");
 const { electron } = require("process");
 const { GetPitchValue, fftAnalysis } = require("./main/audioProcess");
 
@@ -21,7 +21,11 @@ function createWindow() {
   });
 
   // Load the index.html from a url
-  win.loadURL("http://localhost:3000");
+  let loadURL = `file://${path.join(__dirname, "../build/index.html")}`;
+  if (process.env.LOCAL) {
+    loadURL = `http://localhost:3000`;
+  }
+  win.loadURL(loadURL);
 
   // Open the DevTools.
   //win.webContents.openDevTools();

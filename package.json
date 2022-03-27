@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "FPGA and software crossover to bring your microphone clarity and fidelity",
   "main": "public/electron.js",
+  "homepage": "./",
   "dependencies": {
     "@joe_six/duarte-watanabe-peak-detection": "^0.2.0",
     "@joe_six/smoothed-z-score-peak-signal-detection": "^0.1.2",
@@ -20,7 +21,7 @@
     "fft-windowing": "^0.1.4",
     "fili": "^2.0.3",
     "fourier-transform": "^1.1.2",
-    "nodeplotlib": "^1.0.0",
+    "nodeplotlib": "^1.0.1",
     "pitchfinder": "^2.3.2",
     "python-shell": "^3.0.1",
     "react": "^17.0.2",
@@ -32,12 +33,13 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "electron-dev": "electron .",
+    "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3000 && npm run electron-dev",
+    "react-start": "set BROWSER=none && react-scripts start",
+    "react-test": "react-scripts test",
+    "electron-dev": "set LOCAL=true && electron .",
     "pack": "electron-builder --dir",
-    "dist": "react-scripts build && electron-builder"
+    "dist": "react-scripts build && electron-builder",
+    "postinstall": "electron-builder install-app-deps"
   },
   "eslintConfig": {
     "extends": [
@@ -61,26 +63,25 @@
     "type": "git",
     "url": "git+https://github.com/nipunaw/ClariFi.git"
   },
-  "author": "Nipuna",
+  "author": "ClariFi Team",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/nipunaw/ClariFi/issues"
   },
   "devDependencies": {
     "@types/react-dom": "^17.0.11",
+    "concurrently": "^7.0.0",
     "electron": "^16.0.7",
     "electron-builder": "^22.14.5",
     "electron-devtools-installer": "^3.2.0",
-    "react-scripts": "^4.0.3"
+    "react-scripts": "^4.0.3",
+    "wait-on": "^6.0.1"
   },
   "build": {
     "appId": "com.electron.clarifi",
-    "mac": {
-      "category": "public.app-category.utilities"
-    },
+    "productName": "ClariFi",
     "win": {
-      "target": "nsis",
-      "icon": "build/icon.ico"
+      "target": "nsis-web"
     }
   }
 }
