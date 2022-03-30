@@ -121,6 +121,21 @@ const bandstopTaps = (filterOrder, sampleRate, lowerFreq, upperFreq, attenuation
   return firFilterCoeffsK;
 }
 
+const quantizeTaps = (filterTaps) => {
+  let numBits = 24;
+  let maxPos = (2**(numTaps-1))-1;
+  let maxNeg =  -(2**(numTaps-1));
+
+  let normalizedTaps = new Array(length);
+  let max = Math.max(filterTaps);
+
+  for (let i = 0; i < filterTaps.length; i++) {
+    normalizedTaps[i] = filterTaps[i]/max;
+  }
+
+  return normalizedTaps
+}
+
 const noiseRemoval = (frequencies, magnitudes, filterOrder, sampleRate, limit) => {
   const peaksWatanabeIndices = identifyPeaks(magnitudes, 50);
   let strongLowerFreq = [];
