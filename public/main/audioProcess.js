@@ -21,7 +21,7 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
   let spectrum2 = ft(rawData.slice(0, N));
   let decibels = spectrum2.map((value) => db.fromGain(value))
 
-  console.log("##### META-DATA ON FFT-JS #####");
+  console.log("##### META-DATA ON FFT-JS #####"); //TO-DO: Investigate FFT robustness
   console.log("Sample Rate: " + sampleRate);
   console.log("Length of raw data: " + rawData.length);
   console.log("Length of windowed data: " + win.length);
@@ -44,7 +44,7 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
 const firFilterTaps = (frequencies, magnitudes, sampleRate) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
-  const noiseTaps = noiseRemoval(frequencies, magnitudes, 101, sampleRate, 150);
+  const noiseTaps = noiseRemoval(frequencies, magnitudes, 11, sampleRate, 150); //TO-DO: Investigate filter order + limit
   return noiseTaps;
 }
 
@@ -113,7 +113,7 @@ const bandstopTaps = (filterOrder, sampleRate, lowerFreq, upperFreq, attenuation
   var firCalculator = new Fili.FirCoeffs();
   var firFilterCoeffsK = firCalculator.kbFilter({
     order: filterOrder, // filter order (must be odd)
-    Fs: sampleRate, // sampling frequency
+    Fs: 1000, // sampling frequency - TO-DO: Investigate sampling frequency
     Fa: lowerFreq, // rise, 0 for lowpass
     Fb: upperFreq, // fall, Fs/2 for highpass
     Att: attenuation // attenuation in dB
@@ -122,18 +122,36 @@ const bandstopTaps = (filterOrder, sampleRate, lowerFreq, upperFreq, attenuation
 }
 
 const quantizeTaps = (filterTaps) => {
-  let numBits = 24;
-  let maxPos = (2**(numTaps-1))-1;
-  let maxNeg =  -(2**(numTaps-1));
+  let numBits = 8;
+  let maxPos = (2**(numBits-1))-1;
+  let maxNeg =  -(2**(numBits-1));
 
-  let normalizedTaps = new Array(length);
+  let order = filterTaps.length;
+  let normalizedTaps = new Array(order);
+  let quantizedTaps = new Array(order);
+  let negativeIndices = []
   let max = Math.max(filterTaps);
 
-  for (let i = 0; i < filterTaps.length; i++) {
+  for (let i = 0; i < order; i++) {
     normalizedTaps[i] = filterTaps[i]/max;
+    if (normalizedTaps[i] < 0) {
+      negativeIndices.push(i);
+    }
   }
 
-  return normalizedTaps
+  for (let i = 0; i < order; i++) {
+    quantizedTaps[i] = normalizedTaps[i] * maxPos;
+  }
+
+  for (let i = 0; i < negativeIndices.length; i++) {
+    quantizedTaps[negativeIndices[i]] = normalizedTaps[negativeIndices[i]] * maxNeg;
+  }
+
+  for (let i = 0; i < order; i++) {
+    quantizedTaps[i] = Math.round(quantizedTaps[i]);
+  }
+
+  return quantizedTaps
 }
 
 const noiseRemoval = (frequencies, magnitudes, filterOrder, sampleRate, limit) => {
@@ -149,9 +167,9 @@ const noiseRemoval = (frequencies, magnitudes, filterOrder, sampleRate, limit) =
   let bands = [];
   for (let i = 0; i < strongLowerFreq.length; i++) {
     if (strongLowerFreq[i] > 5) { //Greater than 5Hz
-      bands.push(bandstopTaps(filterOrder, sampleRate, strongLowerFreq[i]-5, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 101
+      bands.push(bandstopTaps(filterOrder, sampleRate, strongLowerFreq[i]-5, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
     } else {
-      bands.push(bandstopTaps(filterOrder, sampleRate, 0, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 101
+      bands.push(bandstopTaps(filterOrder, sampleRate, 0, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
     }
   }
 
