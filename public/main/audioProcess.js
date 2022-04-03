@@ -38,14 +38,14 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
   graphFrequencySpectrum(fftFreq, fftData, {title: "AnalyserNode Frequency Spectrum"}); //{"logFreq": true}
   graphFrequencySpectrum(frequencies, magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
   graphFrequencySpectrum(frequencies, decibels, {title: "FFT-ASM Frequency Spectrum"});
-  return firFilterTaps(frequencies, magnitudes, sampleRate);
+  return firFilterCoefficients(frequencies, magnitudes, sampleRate);
 }
 
-const firFilterTaps = (frequencies, magnitudes, sampleRate) => {
+const firFilterCoefficients = (frequencies, magnitudes, sampleRate) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
-  const noiseTaps = noiseRemoval(frequencies, magnitudes, 11, sampleRate, 150); //TO-DO: Investigate filter order + limit
-  return noiseTaps;
+  const noiseCoefficients = noiseRemoval(frequencies, magnitudes, 11, sampleRate, 150); //TO-DO: Investigate filter order + limit
+  return noiseCoefficients;
 }
 
 const identifyPeaks = (magnitudes, mpdVal) => {
@@ -109,7 +109,7 @@ const graphFrequencySpectrum=(frequencies, magnitudes, params={}) => {
   plot(data, layout);
 }
 
-const bandstopTaps = (filterOrder, sampleRate, lowerFreq, upperFreq, attenuation) => {
+const bandstopCoefficients = (filterOrder, sampleRate, lowerFreq, upperFreq, attenuation) => {
   var firCalculator = new Fili.FirCoeffs();
   var firFilterCoeffsK = firCalculator.kbFilter({
     order: filterOrder, // filter order (must be odd)
@@ -121,37 +121,38 @@ const bandstopTaps = (filterOrder, sampleRate, lowerFreq, upperFreq, attenuation
   return firFilterCoeffsK;
 }
 
-const quantizeTaps = (filterTaps) => {
+const quantizeCoefficients = (filterCoefficients) => {
   let numBits = 8;
   let maxPos = (2**(numBits-1))-1;
   let maxNeg =  -(2**(numBits-1));
 
-  let order = filterTaps.length;
-  let normalizedTaps = new Array(order);
-  let quantizedTaps = new Array(order);
+  let order = filterCoefficients.length;
+  let normalizedCoefficients = new Array(order);
+  let quantizedCoefficients = new Array(order);
   let negativeIndices = []
-  let max = Math.max(filterTaps);
+  let max = Math.max.apply(null, filterCoefficients);
 
   for (let i = 0; i < order; i++) {
-    normalizedTaps[i] = filterTaps[i]/max;
-    if (normalizedTaps[i] < 0) {
+    
+    normalizedCoefficients[i] = filterCoefficients[i]/max;
+    if (normalizedCoefficients[i] < 0) {
       negativeIndices.push(i);
     }
   }
 
   for (let i = 0; i < order; i++) {
-    quantizedTaps[i] = normalizedTaps[i] * maxPos;
+    quantizedCoefficients[i] = normalizedCoefficients[i] * maxPos;
   }
 
   for (let i = 0; i < negativeIndices.length; i++) {
-    quantizedTaps[negativeIndices[i]] = normalizedTaps[negativeIndices[i]] * maxNeg;
+    quantizedCoefficients[negativeIndices[i]] = normalizedCoefficients[negativeIndices[i]] * maxNeg;
   }
 
   for (let i = 0; i < order; i++) {
-    quantizedTaps[i] = Math.round(quantizedTaps[i]);
+    quantizedCoefficients[i] = Math.round(quantizedCoefficients[i]);
   }
 
-  return quantizedTaps
+  return quantizedCoefficients
 }
 
 const noiseRemoval = (frequencies, magnitudes, filterOrder, sampleRate, limit) => {
@@ -167,18 +168,21 @@ const noiseRemoval = (frequencies, magnitudes, filterOrder, sampleRate, limit) =
   let bands = [];
   for (let i = 0; i < strongLowerFreq.length; i++) {
     if (strongLowerFreq[i] > 5) { //Greater than 5Hz
-      bands.push(bandstopTaps(filterOrder, sampleRate, strongLowerFreq[i]-5, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
+      bands.push(bandstopCoefficients(filterOrder, sampleRate, strongLowerFreq[i]-5, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
     } else {
-      bands.push(bandstopTaps(filterOrder, sampleRate, 0, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
+      bands.push(bandstopCoefficients(filterOrder, sampleRate, 0, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
     }
   }
 
-  console.log(strongLowerFreq);
+  console.log("Noisy lower frequencies: " + strongLowerFreq);
   if (bands.length > 0) {
     // Safely assume independence of bands
     var sum = (r, a) => r.map((b, i) => a[i] + b);
-    let noisyTaps = bands.reduce(sum);
-    return noisyTaps;
+    let noisyCoefficients = bands.reduce(sum);
+    let quantizedNoisyCoefficients = quantizeCoefficients(noisyCoefficients);
+    console.log("Noisy Coefficients: " + noisyCoefficients);
+    console.log("Quantized Noisy Coefficients: " + quantizedNoisyCoefficients);
+    return quantizedNoisyCoefficients;
   }
   return [];
   
