@@ -1,8 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
 import rootReducer from "./reducers";
 
+const localStorageState: string | null = localStorage.getItem("reduxState");
+const persistedState = localStorageState ? JSON.parse(localStorageState) : {};
+
 const store = configureStore({
   reducer: rootReducer,
+  preloadedState: persistedState,
+});
+
+store.subscribe(() => {
+  localStorage.setItem("reduxState", JSON.stringify(store.getState()));
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
