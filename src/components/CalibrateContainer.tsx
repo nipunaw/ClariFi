@@ -7,7 +7,7 @@ import DeviceConfigure from "./calibrate/DeviceConfigure";
 import { Calibrate } from "enums/calibrate";
 import Process from "./calibrate/Process";
 
-export default function ContentContainer() {
+export default function CalibrateContainer() {
   const { currentState: calibrateState } = useAppSelector(selectCalibrate);
 
   const getContent = (): JSX.Element | null => {
