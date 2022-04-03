@@ -46,11 +46,17 @@ export const calibrateSlice = createSlice({
     setDeviceId: (state, action: PayloadAction<string>) => {
       state.deviceId = action.payload;
     },
+    setInitalState: (state) => {
+      state.currentState = initialState.currentState;
+      state.deviceId = initialState.deviceId;
+      state.testName = initialState.testName;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { nextState, setDeviceId } = calibrateSlice.actions;
+export const { nextState, setDeviceId, setInitalState } =
+  calibrateSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectCalibrate = (state: RootState) => state.calibrate;

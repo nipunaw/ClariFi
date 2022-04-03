@@ -1,12 +1,19 @@
 import SideBar from "./components/SideBar";
-import { useAppSelector } from "hooks";
+import { useAppDispatch, useAppSelector } from "hooks";
 import { selectAppState } from "reducers/appSlice";
+import { setInitalState } from "reducers/calibrateSlice";
 import ContentContainer from "./components/CalibrateContainer";
 import ProfileContainer from "components/ProfileContainer";
 import { ApplicationState } from "enums/app";
+import { useEffect } from "react";
 
 function App() {
+  const dispatch = useAppDispatch();
   const appState = useAppSelector(selectAppState);
+
+  useEffect(() => {
+    dispatch(setInitalState());
+  }, []);
 
   const getAppContent = (): JSX.Element | null => {
     switch (appState) {
