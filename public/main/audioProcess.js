@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const Pitchfinder = require("pitchfinder");
+const { PythonShell } = require("python-shell");
 // FIR and FFT Analysis
 const fft = require('fft-js').fft;
 const fftUtil = require('fft-js').util;
@@ -35,9 +36,9 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
     fftFreq[i] = i*((sampleRate/2)/(fftData.length));
   }
   
-  graphFrequencySpectrum(fftFreq, fftData, {title: "AnalyserNode Frequency Spectrum"}); //{"logFreq": true}
-  graphFrequencySpectrum(frequencies, magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
-  graphFrequencySpectrum(frequencies, decibels, {title: "FFT-ASM Frequency Spectrum"});
+  //graphFrequencySpectrum(fftFreq, fftData, {title: "AnalyserNode Frequency Spectrum"}); //{"logFreq": true}
+  //graphFrequencySpectrum(frequencies, magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
+  //graphFrequencySpectrum(frequencies, decibels, {title: "FFT-ASM Frequency Spectrum"});
   return firFilterCoefficients(frequencies, magnitudes, sampleRate);
 }
 
@@ -45,6 +46,19 @@ const firFilterCoefficients = (frequencies, magnitudes, sampleRate) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
   const noiseCoefficients = noiseRemoval(frequencies, magnitudes, 11, sampleRate, 150); //TO-DO: Investigate filter order + limit
+  
+  let options = {
+    mode: "text",
+    pythonOptions: ["-u"],
+    args: ["t"].concat(noiseCoefficients),
+  };
+
+  PythonShell.run("ftdi.py", options, function (err, results) {
+    if (err) throw err;
+    console.log("Script finished.");
+    console.log('result: ', results.toString());
+  });
+
   return noiseCoefficients;
 }
 
@@ -124,7 +138,7 @@ const bandstopCoefficients = (filterOrder, sampleRate, lowerFreq, upperFreq, att
 const quantizeCoefficients = (filterCoefficients) => {
   let numBits = 8;
   let maxPos = (2**(numBits-1))-1;
-  let maxNeg =  -(2**(numBits-1));
+  let maxNeg =  (2**(numBits-1));
 
   let order = filterCoefficients.length;
   let normalizedCoefficients = new Array(order);
