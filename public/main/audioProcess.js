@@ -123,22 +123,26 @@ const graphFrequencySpectrum=(frequencies, magnitudes, params={}) => {
   plot(data, layout);
 }
 
-const bandstopCoefficients = (sampleRate, lowerFreq, upperFreq, attenuation) => {
+const bandstopCoefficients = (sampleRate, fallingEdgeFreq, risingEdgeFreq, attenuation, filterOrder) => {
   var firCalculator = new Fili.FirCoeffs();
-
-  let atten = -20*Math.log10(Math.min(0.05, 10**(attenuation/-20))) // Passband ripple of 5% is permissible
-  console.log("Attenuation [dB]: " + atten);
-  let filterOrder = Math.ceil((atten - 7.95)/(2*Math.PI*2.285*(upperFreq/sampleRate-lowerFreq/sampleRate))) //Kaiser formula
-  console.log("Filter order: " + filterOrder);
-
   var firFilterCoeffsK = firCalculator.kbFilter({
     order: filterOrder, // filter order (must be odd)
-    Fs: sampleRate, // sampling frequency - TO-DO: Investigate sampling frequency
-    Fa: upperFreq, // rise, 0 for lowpass
-    Fb: lowerFreq, // fall, Fs/2 for highpass
-    Att: atten // attenuation in dB
+    Fs: sampleRate, // sampling frequency
+    Fa: risingEdgeFreq, // rise, 0 for lowpass
+    Fb: fallingEdgeFreq, // fall, Fs/2 for highpass
+    Att: attenuation // attenuation in dB
+    // Assumption: Fa > Fb for band-stop (opposite for bandpass)
   });
   return firFilterCoeffsK;
+}
+
+const filterOrderAndAttenuation = (sampleRate, transitionWidth, attenuationDB) => {
+  let attenuation = -20*Math.log10(Math.min(0.05, 10**(attenuationDB/-20))) // Passband ripple of 5% is permissible
+  console.log("Attenuation [dB]: " + attenuation);
+  let filterOrder = Math.ceil((attenuation - 7.95)/(2*Math.PI*2.285*(transitionWidth/sampleRate))) //Kaiser formula
+  console.log("Filter order: " + filterOrder);
+
+  return [filterOrder, attenuation]
 }
 
 const quantizeCoefficients = (filterCoefficients) => {
@@ -177,28 +181,39 @@ const quantizeCoefficients = (filterCoefficients) => {
 
 const noiseRemoval = (frequencies, magnitudes, sampleRate, limit) => {
   const peaksWatanabeIndices = identifyPeaks(magnitudes, 50);
-  let strongLowerFreq = [];
+  let targetFrequencies = [];
+  let targetMagnitudes = [];
   for (let i = 0; i < peaksWatanabeIndices.length; i++) {
     if (frequencies[peaksWatanabeIndices[i]] < limit) {
-      strongLowerFreq.push(Math.round(frequencies[peaksWatanabeIndices[i]]));
+      targetFrequencies.push(Math.round(frequencies[peaksWatanabeIndices[i]]));
+      targetMagnitudes.push(Math.round(magnitudes[peaksWatanabeIndices[i]]))
     }
   }
-
   
-  let bands = [];
-  for (let i = 0; i < strongLowerFreq.length; i++) {
-    if (strongLowerFreq[i] > 5) { //Greater than 5Hz
-      bands.push(bandstopCoefficients(sampleRate, strongLowerFreq[i]-5, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
+  let orderAttenParams = []
+  let maxFilterOrder = -999; // Max filter order (min required for good results)
+  for (let i = 0; i < targetFrequencies.length; i++) {
+    orderAttenParams.push(filterOrderAndAttenuation(sampleRate, 20, Math.abs(targetMagnitudes[i])-60)); // Attenuate by a meaningful value, arbitrary transition width
+    if (orderAttenParams[i][0] > maxFilterOrder) {
+      maxFilterOrder = orderAttenParams[i][0]
+    }
+  }
+  console.log("Max Filter Order:" + maxFilterOrder);
+
+  let bandstopSet = [];
+  for (let i = 0; i < targetFrequencies.length; i++) {
+    if (targetFrequencies[i] > 5) { //Greater than 5Hz
+      bandstopSet.push(bandstopCoefficients(sampleRate, targetFrequencies[i]-2, targetFrequencies[i]+2, orderAttenParams[i][1], maxFilterOrder));
     } else {
-      bands.push(bandstopCoefficients(sampleRate, 0, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
+      bandstopSet.push(bandstopCoefficients(sampleRate, 0, targetFrequencies[i]+2, orderAttenParams[i][1], maxFilterOrder));
     }
   }
 
-  console.log("Noisy lower frequencies: " + strongLowerFreq);
-  if (bands.length > 0) {
+  console.log("Noisy lower frequencies: " + targetFrequencies);
+  if (bandstopSet.length > 0) {
     // Safely assume independence of bands
     var sum = (r, a) => r.map((b, i) => a[i] + b);
-    let noisyCoefficients = bands.reduce(sum);
+    let noisyCoefficients = bandstopSet.reduce(sum);
     let quantizedNoisyCoefficients = quantizeCoefficients(noisyCoefficients);
     console.log("Noisy Coefficients: " + noisyCoefficients);
     console.log("Quantized Noisy Coefficients: " + quantizedNoisyCoefficients);
