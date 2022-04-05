@@ -45,12 +45,12 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
 const firFilterCoefficients = (frequencies, magnitudes, sampleRate) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
-  const noiseCoefficients = noiseRemoval(frequencies, magnitudes, 11, sampleRate, 150); //TO-DO: Investigate filter order + limit
+  const noiseCoefficients = noiseRemoval(frequencies, magnitudes, sampleRate, 150); //TO-DO: Investigate limit
   
   let options = {
     mode: "text",
     pythonOptions: ["-u"],
-    args: ["t"].concat(noiseCoefficients),
+    args: ["t"].concat(noiseCoefficients.reverse()),
   };
 
   PythonShell.run("ftdi.py", options, function (err, results) {
@@ -123,14 +123,20 @@ const graphFrequencySpectrum=(frequencies, magnitudes, params={}) => {
   plot(data, layout);
 }
 
-const bandstopCoefficients = (filterOrder, sampleRate, lowerFreq, upperFreq, attenuation) => {
+const bandstopCoefficients = (sampleRate, lowerFreq, upperFreq, attenuation) => {
   var firCalculator = new Fili.FirCoeffs();
+
+  let atten = -20*Math.log10(Math.min(0.05, 10**(attenuation/-20))) // Passband ripple of 5% is permissible
+  console.log("Attenuation [dB]: " + atten);
+  let filterOrder = Math.ceil((atten - 7.95)/(2*Math.PI*2.285*(upperFreq/sampleRate-lowerFreq/sampleRate))) //Kaiser formula
+  console.log("Filter order: " + filterOrder);
+
   var firFilterCoeffsK = firCalculator.kbFilter({
     order: filterOrder, // filter order (must be odd)
-    Fs: 1000, // sampling frequency - TO-DO: Investigate sampling frequency
-    Fa: lowerFreq, // rise, 0 for lowpass
-    Fb: upperFreq, // fall, Fs/2 for highpass
-    Att: attenuation // attenuation in dB
+    Fs: sampleRate, // sampling frequency - TO-DO: Investigate sampling frequency
+    Fa: upperFreq, // rise, 0 for lowpass
+    Fb: lowerFreq, // fall, Fs/2 for highpass
+    Att: atten // attenuation in dB
   });
   return firFilterCoeffsK;
 }
@@ -169,7 +175,7 @@ const quantizeCoefficients = (filterCoefficients) => {
   return quantizedCoefficients
 }
 
-const noiseRemoval = (frequencies, magnitudes, filterOrder, sampleRate, limit) => {
+const noiseRemoval = (frequencies, magnitudes, sampleRate, limit) => {
   const peaksWatanabeIndices = identifyPeaks(magnitudes, 50);
   let strongLowerFreq = [];
   for (let i = 0; i < peaksWatanabeIndices.length; i++) {
@@ -182,9 +188,9 @@ const noiseRemoval = (frequencies, magnitudes, filterOrder, sampleRate, limit) =
   let bands = [];
   for (let i = 0; i < strongLowerFreq.length; i++) {
     if (strongLowerFreq[i] > 5) { //Greater than 5Hz
-      bands.push(bandstopCoefficients(filterOrder, sampleRate, strongLowerFreq[i]-5, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
+      bands.push(bandstopCoefficients(sampleRate, strongLowerFreq[i]-5, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
     } else {
-      bands.push(bandstopCoefficients(filterOrder, sampleRate, 0, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
+      bands.push(bandstopCoefficients(sampleRate, 0, strongLowerFreq[i]+5, 5)); //Attenuate by 5 dB, order of 11
     }
   }
 
