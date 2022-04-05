@@ -2,7 +2,7 @@ import "css/MainContent.css";
 import { useAppDispatch } from "hooks";
 import { nextState } from "reducers/calibrateSlice";
 
-const Process: React.FC<{}> = () => {
+const ProcessTest: React.FC<{}> = () => {
   const dispatch = useAppDispatch();
 
   return (
@@ -15,10 +15,11 @@ const Process: React.FC<{}> = () => {
         }}
       >
         If the ClariFi device is connected, the calculated filter taps have been
-        transmitted via SPI to the FPGA. Thank you for using our application.
+        transmitted via SPI to the FPGA. Please proceed with the next test.
       </div>
+      <button onClick={() => dispatch(nextState())}> Proceed</button>
     </div>
   );
 };
 
-export default Process;
+export default ProcessTest;

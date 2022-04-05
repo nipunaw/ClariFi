@@ -34,6 +34,19 @@ export const calibrateSlice = createSlice({
           break;
         }
         case Calibrate.audioTest1: {
+          state.currentState = Calibrate.processTest;
+          break;
+        }
+        case Calibrate.processTest: {
+          state.currentState = Calibrate.prompt2;
+          break;
+        }
+        case Calibrate.prompt2: {
+          state.currentState = Calibrate.audioTest2;
+          state.testName = "Sibilant";
+          break;
+        }
+        case Calibrate.audioTest2: {
           state.currentState = Calibrate.process;
           break;
         }
