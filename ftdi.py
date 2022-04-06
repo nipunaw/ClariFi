@@ -1,6 +1,7 @@
 from pyftdi.ftdi import Ftdi
 from pyftdi.spi import (SpiController)
 from time import sleep
+import sys
 
 Ftdi.show_devices()
 
@@ -50,63 +51,59 @@ class _GetchWindows:
         return msvcrt.getch()
 
 
-getch = _Getch()
+def main():
+    #getch = _Getch()
+    curValue = 0
+    curMode = "LED"
 
-curValue = 0
-curMode = "LED"
+    print("Now in LED mode")
 
-print("Now in LED mode")
+    for command in sys.argv[1:]:
+        if curMode == "LED":
 
-while True:
-    if curMode == "LED":
-        c = ord(getch())
+            if command == "q":
+                spi.close()
+                quit()
+            elif command == "t":
+                curMode = "TAPS"
+                print("Now in Taps mode")
+                continue
 
-        if c == ord('q'):
-            spi.close()
-            quit()
-        elif c == ord('t'):
-            curMode = "TAPS"
-            print("Now in Taps mode")
-            continue
+            n = int(command) - ord('0')
+            a = int(command) - ord('a')
 
-        n = c - ord('0')
-        a = c - ord('a')
+            newNibble = 0
 
-        newNibble = 0
+            if n in range(0, 10):
+                print(n)
+                newNibble = n
+            elif a in range(0, 7):
+                a = a + 10
+                print(a)
+                newNibble = a
+            else:
+                continue
 
-        if n in range(0, 10):
-            print(n)
-            newNibble = n
-        elif a in range(0, 7):
-            a = a + 10
-            print(a)
-            newNibble = a
-        else:
-            continue
+            curValue = ((curValue << 4) & 0xF0) | newNibble
+            writeToSlave([0x01, curValue])
 
-        curValue = ((curValue << 4) & 0xF0) | newNibble
+        elif curMode == "TAPS":
+            
+            if command == "q":
+                spi.close()
+                quit()
+            elif command == "l":
+                curMode = "LED"
+                print("Now in LED mode")
+                continue
 
-        writeToSlave([0x01, curValue])
-    elif curMode == "TAPS":
-        line = input()
-        
-        if line == "q":
-            spi.close()
-            quit()
-        elif line == "l":
-            curMode = "LED"
-            print("Now in LED mode")
-            continue
+            coefficient = int(command)
 
-        coefficient = int(line)
+            if coefficient not in range(0, 256):
+                print("Value must be between 0 and 255")
+                continue
 
-        if coefficient not in range(0, 256):
-            print("Value must be between 0 and 255")
-            continue
+            writeToSlave([0x02, coefficient])
 
-        writeToSlave([0x02, coefficient])
-
-        
-
-    
-    
+if __name__ == "__main__":
+    main()

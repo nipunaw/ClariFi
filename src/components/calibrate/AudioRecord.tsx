@@ -52,9 +52,9 @@ const handleDataAvailable = (event: BlobEvent) => {
     audioCtx.decodeAudioData(arrayBuf).then((buffer) => {
       //sample rate is 48kHz for my device
 
-      let bufferLength = analyser.frequencyBinCount;
-      const fftData = new Float32Array(bufferLength);
-      analyser.getFloatFrequencyData(fftData);
+      //let bufferLength = analyser.frequencyBinCount;
+      //const fftData = new Float32Array(bufferLength);
+      //analyser.getFloatFrequencyData(fftData);
 
       const rawRecordedData = buffer.getChannelData(0); // get a single channel of sound
       const sampleRate = audioCtx.sampleRate;
@@ -62,7 +62,7 @@ const handleDataAvailable = (event: BlobEvent) => {
         "process-audio",
         rawRecordedData,
         sampleRate,
-        fftData
+        "ambience"
       );
     });
   });
