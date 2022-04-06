@@ -5,9 +5,24 @@ import sys
 
 Ftdi.show_devices()
 
-spi = SpiController()
-spi.configure('ftdi://ftdi:232h:FT4RZWM0/1')
-slave = spi.get_port(cs=0, freq = 12E4, mode=0)
+spi = None
+slave = None
+
+
+def intitializeMasterSlave():
+    global spi
+    global slave
+
+    try:
+        spi = SpiController()
+        spi.configure('ftdi://ftdi:232h:FT4RZWM0/1')
+        slave = spi.get_port(cs=0, freq = 12E4, mode=0)
+        return 1
+    except:
+        print("ClariFi is not connected or was disconnected.")
+        return 0
+
+
 
 def writeToSlave(out: bytes):
     global spi
@@ -53,6 +68,9 @@ class _GetchWindows:
 
 def main():
     #getch = _Getch()
+    success = intitializeMasterSlave()
+    if (success != 1):
+        return
     curValue = 0
     curMode = "LED"
 
