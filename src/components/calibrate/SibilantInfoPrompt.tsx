@@ -14,11 +14,11 @@ const SibilantInfoPrompt: React.FC<{}> = () => {
           marginBottom: "20px",
         }}
       >
-        This recording test will assess the sibilant noise in your current
-        enviornment. Please position your microphone to a desirable speaking
+        This recording test will assess the sibilant noise in your speech
+        pattern. Please position your microphone to a desirable speaking
         position before proceeding. On the next page, you can review your
         selected device and begin recording, which will last 5-6 seconds. Please
-        remain completely quiet during this time.
+        sound out the letter "s" at a consistent pitch while recording.
       </div>
       <button onClick={() => dispatch(nextState())}> Proceed</button>
     </div>
