@@ -47,7 +47,7 @@ const fftAnalysis = (rawData, sampleRate, test_type) => {
   }
   
   // graphFrequencySpectrum(fftFreq, fftData, {title: "AnalyserNode Frequency Spectrum"}); //{"logFreq": true}
-  graphFrequencySpectrum(frequencies, s_magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
+  // graphFrequencySpectrum(frequencies, s_magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
   // graphFrequencySpectrum(frequencies, decibels, {title: "FFT-ASM Frequency Spectrum"});
   // graphFrequencySpectrum(frequencies, dB, {title: "FFT-Fili Frequency Spectrum"});
   return firFilterCoefficients(frequencies, s_magnitudes, sampleRate, test_type);
