@@ -6,22 +6,26 @@ const fft = require('fft-js').fft;
 const fftUtil = require('fft-js').util;
 const windowing = require('fft-windowing');
 const Fili = require('fili');
-var ft = require('fourier-transform');
-var db = require('decibels');
+//var ft = require('fourier-transform');
+//var db = require('decibels');
 // Smoothing and Plots
 const smoothed_z_score = require("@joe_six/smoothed-z-score-peak-signal-detection");
 const detect_peaks = require("@joe_six/duarte-watanabe-peak-detection")
 const { plot, Plot} = require("nodeplotlib");
 
-const fftAnalysis = (rawData, sampleRate, fftData) => {
-  let N = 32768;
-  let win = windowing.hann(rawData.slice(0, N), N); //rawData.slice(0, N), 
-  let spectrum = fft(win); // 48000 > samples 
+const fftAnalysis = (rawData, sampleRate, test_type) => {
+  let N = 65536;
+  let win = windowing.hann(rawData.slice(0, N), N); //rawData.slice(0, N)
+  let spectrum = fft(win); // 48000 > samples  //windowed
   let frequencies = fftUtil.fftFreq(spectrum, sampleRate); // Sample rate and coef is just used for length, and frequency step
-  let magnitudes = fftUtil.fftMag(spectrum);
-  let spectrum2 = ft(rawData.slice(0, N));
-  let decibels = spectrum2.map((value) => db.fromGain(value))
+  let magnitudes = fftUtil.fftMag(spectrum);  
+  //let spectrum2 = ft(rawData.slice(0, N));
+  //let decibels = spectrum2.map((value) => db.fromGain(value))
 
+  // var fft_fili = new Fili.Fft(16384);
+  // var fftResult = fft_fili.forward(rawData, 'blackman');
+  // var magnitude = fft_fili.magnitude(fftResult);
+  // var dB = fft_fili.magToDb(magnitude);
   console.log("##### META-DATA ON FFT-JS #####"); //TO-DO: Investigate FFT robustness
   console.log("Sample Rate: " + sampleRate);
   console.log("Length of raw data: " + rawData.length);
@@ -31,21 +35,41 @@ const fftAnalysis = (rawData, sampleRate, fftData) => {
   console.log("Length of magnitudes: " + magnitudes.length);
   console.log("");
 
-  let fftFreq = new Float32Array(fftData.length);
-  for (let i = 0; i < fftData.length; i++) {
-    fftFreq[i] = i*((sampleRate/2)/(fftData.length));
+  // let fftFreq = new Float32Array(fftData.length);
+  // for (let i = 0; i < fftData.length; i++) {
+  //   fftFreq[i] = i*((sampleRate/2)/(fftData.length));
+  // }
+
+  let s_magnitudes = new Array(N/2)
+
+  for (let i = 0; i < N/2; i++) {
+    s_magnitudes[i] = 20*Math.log10(2*magnitudes[i]/8192);
   }
   
-  //graphFrequencySpectrum(fftFreq, fftData, {title: "AnalyserNode Frequency Spectrum"}); //{"logFreq": true}
-  //graphFrequencySpectrum(frequencies, magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
-  //graphFrequencySpectrum(frequencies, decibels, {title: "FFT-ASM Frequency Spectrum"});
-  return firFilterCoefficients(frequencies, magnitudes, sampleRate);
+  // graphFrequencySpectrum(fftFreq, fftData, {title: "AnalyserNode Frequency Spectrum"}); //{"logFreq": true}
+  graphFrequencySpectrum(frequencies, s_magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
+  // graphFrequencySpectrum(frequencies, decibels, {title: "FFT-ASM Frequency Spectrum"});
+  // graphFrequencySpectrum(frequencies, dB, {title: "FFT-Fili Frequency Spectrum"});
+  return firFilterCoefficients(frequencies, s_magnitudes, sampleRate, test_type);
 }
 
-const firFilterCoefficients = (frequencies, magnitudes, sampleRate) => {
+const firFilterCoefficients = (frequencies, magnitudes, sampleRate, test_type) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
-  const noiseCoefficients = noiseRemoval(frequencies, magnitudes, sampleRate, 150); //TO-DO: Investigate limit
+  let lowerLim = 0
+  let upperLim = sampleRate/2
+  let mpd = 0
+  
+  if (test_type == "ambience") {
+    upperLim = 150
+    mpd = 500
+  } else {
+    lowerLim = 4000
+    upperLim = 8000
+    mpd = 5000
+  }
+
+  const noiseCoefficients = noiseRemoval(frequencies, magnitudes, sampleRate, lowerLim, upperLim, mpd);
   
   let options = {
     mode: "text",
@@ -59,13 +83,13 @@ const firFilterCoefficients = (frequencies, magnitudes, sampleRate) => {
     console.log('result: ', results.toString());
   });
 
-  return noiseCoefficients;
+  return noiseCoefficients; // Not used by Renderer process (sent by Python script)
 }
 
 const identifyPeaks = (magnitudes, mpdVal) => {
-  const magnitudesNoiseDescending = [...magnitudes].sort(function (a, b) {  return a - b;  }).reverse();
-  const magnitudesNoiseThreshold = magnitudesNoiseDescending[15]; // Assumes no more than 15 peaks
-  return detect_peaks(magnitudes, {mpd: mpdVal, mph: magnitudesNoiseThreshold});
+  //const magnitudesNoiseDescending = [...magnitudes].sort(function (a, b) {  return a - b;  }).reverse();
+  //const magnitudesNoiseThreshold = magnitudesNoiseDescending[15]; // Assumes no more than 15 peaks
+  return detect_peaks(magnitudes, {mpd: mpdVal, mph: -96});
 }
 
 // Helper function for graphing/testing
@@ -93,7 +117,7 @@ const graphFrequencySpectrum=(frequencies, magnitudes, params={}) => {
   
   if (scaleMagnitude == true) {
     for (let i = 0; i < length; i++) {
-      graphMagnitudes[i] = 20*Math.log10(2*magnitudes[i]/fftSize);
+      graphMagnitudes[i] = 20*Math.log10(2*magnitudes[i]/8192); //20*Math.log10(2*magnitudes[i]/fftSize)
     }
   } else {
     for (let i = 0; i < length; i++) {
@@ -137,10 +161,10 @@ const bandstopCoefficients = (sampleRate, fallingEdgeFreq, risingEdgeFreq, atten
 }
 
 const filterOrderAndAttenuation = (sampleRate, transitionWidth, attenuationDB) => {
-  let attenuation = -20*Math.log10(Math.min(0.05, 10**(attenuationDB/-20))) // Passband ripple of 5% is permissible
-  console.log("Attenuation [dB]: " + attenuation);
+  let attenuation = -20*Math.log10(Math.min(0.15, 10**(attenuationDB/-20))) // Passband ripple of 15% is permissible
+  //console.log("Attenuation [dB]: " + attenuation);
   let filterOrder = Math.ceil((attenuation - 7.95)/(2*Math.PI*2.285*(transitionWidth/sampleRate))) //Kaiser formula
-  console.log("Filter order: " + filterOrder);
+  //console.log("Filter order: " + filterOrder);
 
   return [filterOrder, attenuation]
 }
@@ -179,21 +203,22 @@ const quantizeCoefficients = (filterCoefficients) => {
   return quantizedCoefficients
 }
 
-const noiseRemoval = (frequencies, magnitudes, sampleRate, limit) => {
-  const peaksWatanabeIndices = identifyPeaks(magnitudes, 50);
+const noiseRemoval = (frequencies, magnitudes, sampleRate, lowerLim, upperLim, mpd) => {
+  const peaksWatanabeIndices = identifyPeaks(magnitudes, mpd);
   let targetFrequencies = [];
   let targetMagnitudes = [];
   for (let i = 0; i < peaksWatanabeIndices.length; i++) {
-    if (frequencies[peaksWatanabeIndices[i]] < limit) {
+    if (frequencies[peaksWatanabeIndices[i]] < upperLim && lowerLim < frequencies[peaksWatanabeIndices[i]]  ) {
       targetFrequencies.push(Math.round(frequencies[peaksWatanabeIndices[i]]));
       targetMagnitudes.push(Math.round(magnitudes[peaksWatanabeIndices[i]]))
     }
   }
   
   let orderAttenParams = []
-  let maxFilterOrder = -999; // Max filter order (min required for good results)
+  let maxFilterOrder = Number.MIN_VALUE; // Max filter order (min required for good results)
   for (let i = 0; i < targetFrequencies.length; i++) {
-    orderAttenParams.push(filterOrderAndAttenuation(sampleRate, 20, Math.abs(targetMagnitudes[i])-60)); // Attenuate by a meaningful value, arbitrary transition width
+    orderAttenParams.push(filterOrderAndAttenuation(sampleRate, 30, 96-Math.abs(targetMagnitudes[i]))); // Attenuates by a meaningful value, 30Hz transition width
+    //console.log("What we should attenuate by: " + (96-Math.abs(targetMagnitudes[i])));
     if (orderAttenParams[i][0] > maxFilterOrder) {
       maxFilterOrder = orderAttenParams[i][0]
     }
@@ -215,8 +240,8 @@ const noiseRemoval = (frequencies, magnitudes, sampleRate, limit) => {
     var sum = (r, a) => r.map((b, i) => a[i] + b);
     let noisyCoefficients = bandstopSet.reduce(sum);
     let quantizedNoisyCoefficients = quantizeCoefficients(noisyCoefficients);
-    console.log("Noisy Coefficients: " + noisyCoefficients);
-    console.log("Quantized Noisy Coefficients: " + quantizedNoisyCoefficients);
+    //console.log("Noisy Coefficients: " + noisyCoefficients);
+    //console.log("Quantized Noisy Coefficients: " + quantizedNoisyCoefficients);
     return quantizedNoisyCoefficients;
   }
   return [];
