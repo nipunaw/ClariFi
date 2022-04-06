@@ -35,4 +35,7 @@ export const { setProfile, createProfile } = profileSlice.actions;
 export const selectProfileId = (state: RootState) =>
   state.profile.currentProfileId;
 
+export const selectAllProfiles = (state: RootState) =>
+  state.profile.savedProfiles;
+
 export default profileSlice.reducer;

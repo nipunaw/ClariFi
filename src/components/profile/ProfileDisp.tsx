@@ -1,9 +1,18 @@
 import "css/MainContent.css";
-import { useAppDispatch } from "hooks";
+import { useAppDispatch, useAppSelector } from "hooks";
+import { selectAllProfiles } from "reducers/profileSlice";
 import { nextState } from "reducers/calibrateSlice";
+import PorfileObject from "./ProfileObject";
 
 const ProfileDisp: React.FC<{}> = () => {
   const dispatch = useAppDispatch();
+  const profiles = useAppSelector(selectAllProfiles);
+
+  const getProfiles = (): JSX.Element[] => {
+    return profiles.map((profile, index: number) => {
+      return <PorfileObject profile={profile} />;
+    });
+  };
 
   return (
     <div className="main-content" style={{ wordBreak: "break-word" }}>
@@ -14,7 +23,7 @@ const ProfileDisp: React.FC<{}> = () => {
           marginBottom: "20px",
         }}
       >
-        The profiles will be dipslayed here.
+        {getProfiles()}
       </div>
     </div>
   );
