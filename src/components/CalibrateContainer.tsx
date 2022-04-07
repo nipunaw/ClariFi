@@ -1,7 +1,8 @@
 import "css/MainContent.css";
 import AudioRecord from "./calibrate/AudioRecord";
 import NoiseInfoPrompt from "./calibrate/NoiseInfoPrompt";
-import { useAppSelector } from "hooks";
+import { useAppSelector, useAppDispatch } from "hooks";
+import { setInitalState } from "reducers/calibrateSlice";
 import { selectCalibrate } from "reducers/calibrateSlice";
 import DeviceConfigure from "./calibrate/DeviceConfigure";
 import { Calibrate } from "enums/calibrate";
@@ -12,6 +13,7 @@ import InitalPrompt from "./calibrate/InitalPrompt";
 
 export default function CalibrateContainer() {
   const { currentState: calibrateState } = useAppSelector(selectCalibrate);
+  const dispatch = useAppDispatch();
 
   const getContent = (): JSX.Element | null => {
     switch (calibrateState) {
@@ -34,9 +36,32 @@ export default function CalibrateContainer() {
     }
   };
 
+  const getButton = () => {
+    if (
+      calibrateState != Calibrate.initalMenu &&
+      calibrateState != Calibrate.process
+    ) {
+      return (
+        <button
+          className="user-button"
+          style={{
+            backgroundColor: "var(--red-color)",
+            borderColor: "var(--red-color)",
+          }}
+          onClick={() => dispatch(setInitalState())}
+        >
+          Start Over
+        </button>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="inner-container">
-      <div className="overflow-content">{getContent()}</div>
+      <div className="overflow-content">
+        {getContent()} {getButton()}
+      </div>
     </div>
   );
 }

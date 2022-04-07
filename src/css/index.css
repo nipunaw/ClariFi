@@ -2,6 +2,8 @@
   --lighter-color: #2e51aa;
   --darker-color: #002573;
   --purple-color: #7e57c2;
+  --drak-gray-color: #424242;
+  --red-color: #b71c1c;
   --white-color: #fff;
   --overlay-color: #173677;
 }
@@ -52,7 +54,6 @@ code {
 
 .user-button {
   margin-top: 20px;
-  cursor: pointer;
   min-height: 40px;
   width: 100%;
   background-color: var(--purple-color);
@@ -64,4 +65,15 @@ code {
   border-radius: 3px;
   border: solid;
   border-color: var(--purple-color);
+}
+
+.user-button:disabled {
+  background-color: var(--drak-gray-color);
+  border-color: var(--drak-gray-color);
+  opacity: 80%;
+}
+
+.text-field {
+  width: 100%;
+  margin-top: 20px;
 }

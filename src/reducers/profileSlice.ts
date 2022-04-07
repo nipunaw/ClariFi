@@ -21,8 +21,16 @@ export const profileSlice = createSlice({
     setProfile: (state, action: PayloadAction<number>) => {
       state.currentProfileId = action.payload;
     },
-    createProfile: (state, action: PayloadAction<Profile>) => {
-      state.savedProfiles.push(action.payload);
+    createProfile: (
+      state,
+      action: PayloadAction<{ name: String; values: number[] }>
+    ) => {
+      let createdProfile: Profile = {
+        id: state.nextProfileId,
+        name: action.payload.name,
+        values: action.payload.values,
+      };
+      state.savedProfiles.push(createdProfile);
       state.nextProfileId = state.nextProfileId + 1;
     },
   },
