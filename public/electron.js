@@ -3,7 +3,7 @@ const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const { electron } = require("process");
-const { GetPitchValue, fftAnalysis } = require("./main/audioProcess");
+const { fftAnalysis, coefficientGeneration, sendCoefficients } = require("./main/audioProcess");
 
 var installExtension;
 var REDUX_DEVTOOLS;
@@ -76,13 +76,20 @@ function createWindow() {
     try {
       //Pitch method is deprecated
       //const pitch = GetPitchValue(rawRecordedData);
-      const noiseTaps = fftAnalysis(rawRecordedData, sampleRate, test_type);
+      values;
+      if (test_type == "ambience" || test_type == "sibilance") {
+        values = fftAnalysis(rawRecordedData, sampleRate, test_type);
+      } else if (test_type == "coefficients") {
+        values = coefficientGeneration(targetFreqMags);
+      } else if (test_type == "profile_deploy") {
+        sendCoefficients(values);
+      }
 
       win.webContents.send(
         "audio-finished",
         true,
         `No errors occured while processing!`,
-        noiseTaps
+        values
       );
     } catch (e) {
       console.log(e);

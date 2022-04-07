@@ -50,10 +50,10 @@ const fftAnalysis = (rawData, sampleRate, test_type) => {
   // graphFrequencySpectrum(frequencies, s_magnitudes, {title: "FFT-JS Frequency Spectrum"}); //{"scaleMagnitude": true, "logFreq": true}
   // graphFrequencySpectrum(frequencies, decibels, {title: "FFT-ASM Frequency Spectrum"});
   // graphFrequencySpectrum(frequencies, dB, {title: "FFT-Fili Frequency Spectrum"});
-  return firFilterCoefficients(frequencies, s_magnitudes, sampleRate, test_type);
+  return firFilterParams(frequencies, s_magnitudes, sampleRate, test_type);
 }
 
-const firFilterCoefficients = (frequencies, magnitudes, sampleRate, test_type) => {
+const firFilterParams = (frequencies, magnitudes, sampleRate, test_type) => {
   // TO-DO: Continue testing smoothing methods, for now electing Watanabe method
   //const peaksSmoothed = smoothed_z_score(magnitudes, {lag: 40, threshold: 4.5, influence: 0.2});
   let lowerLim = 0
@@ -69,21 +69,8 @@ const firFilterCoefficients = (frequencies, magnitudes, sampleRate, test_type) =
     mpd = 5000
   }
 
-  const noiseCoefficients = noiseRemoval(frequencies, magnitudes, sampleRate, lowerLim, upperLim, mpd);
-  
-  let options = {
-    mode: "text",
-    pythonOptions: ["-u"],
-    args: ["t"].concat(noiseCoefficients.reverse()),
-  };
-
-  PythonShell.run("ftdi.py", options, function (err, results) {
-    if (err) throw err;
-    console.log("Script finished.");
-    console.log('result: ', results.toString());
-  });
-
-  return noiseCoefficients; // Not used by Renderer process (sent by Python script)
+  const targetFreqMags = noiseRemoval(frequencies, magnitudes, sampleRate, lowerLim, upperLim, mpd);
+  return targetFreqMags; // Not used by Renderer process (sent by Python script)
 }
 
 const identifyPeaks = (magnitudes, mpdVal) => {
@@ -160,13 +147,13 @@ const bandstopCoefficients = (sampleRate, fallingEdgeFreq, risingEdgeFreq, atten
   return firFilterCoeffsK;
 }
 
-const filterOrderAndAttenuation = (sampleRate, transitionWidth, attenuationDB) => {
+const filterOrderAndAttenuation = (sampleRate, transitionWidth, attenuationDB, frequency) => {
   let attenuation = -20*Math.log10(Math.min(0.15, 10**(attenuationDB/-20))) // Passband ripple of 15% is permissible
   //console.log("Attenuation [dB]: " + attenuation);
   let filterOrder = Math.ceil((attenuation - 7.95)/(2*Math.PI*2.285*(transitionWidth/sampleRate))) //Kaiser formula
   //console.log("Filter order: " + filterOrder);
 
-  return [filterOrder, attenuation]
+  return {"frequency": frequency, "order": filterOrder, "attenuation": attenuation};
 }
 
 const quantizeCoefficients = (filterCoefficients) => {
@@ -205,32 +192,37 @@ const quantizeCoefficients = (filterCoefficients) => {
 
 const noiseRemoval = (frequencies, magnitudes, sampleRate, lowerLim, upperLim, mpd) => {
   const peaksWatanabeIndices = identifyPeaks(magnitudes, mpd);
-  let targetFrequencies = [];
-  let targetMagnitudes = [];
+  let targetFreqMags = {}
   for (let i = 0; i < peaksWatanabeIndices.length; i++) {
     if (frequencies[peaksWatanabeIndices[i]] < upperLim && lowerLim < frequencies[peaksWatanabeIndices[i]]  ) {
-      targetFrequencies.push(Math.round(frequencies[peaksWatanabeIndices[i]]));
-      targetMagnitudes.push(Math.round(magnitudes[peaksWatanabeIndices[i]]))
+      targetFreqMags.push([{"frequency": Math.round(frequencies[peaksWatanabeIndices[i]]), "magnitude": Math.round(magnitudes[peaksWatanabeIndices[i]])}])
     }
   }
-  
-  let orderAttenParams = []
+  return targetFreqMags;
+}
+
+const coefficientGeneration = (targetFreqMags) => {
+  let filterParams = []
   let maxFilterOrder = Number.MIN_VALUE; // Max filter order (min required for good results)
-  for (let i = 0; i < targetFrequencies.length; i++) {
-    orderAttenParams.push(filterOrderAndAttenuation(sampleRate, 30, 96-Math.abs(targetMagnitudes[i]))); // Attenuates by a meaningful value, 30Hz transition width
+  for (let i = 0; i < targetFreqMags.length; i++) {
+    filterParams.push(filterOrderAndAttenuation(sampleRate, 30, 96-Math.abs(targetFreqMags[i]["magnitude"]), targetFreqMags[i]["frequency"])); // Attenuates by a meaningful value, 30Hz transition width
     //console.log("What we should attenuate by: " + (96-Math.abs(targetMagnitudes[i])));
-    if (orderAttenParams[i][0] > maxFilterOrder) {
-      maxFilterOrder = orderAttenParams[i][0]
+    if (filterParams[i][0] > maxFilterOrder) {
+      maxFilterOrder = filterParams[i][0]
     }
   }
   console.log("Max Filter Order:" + maxFilterOrder);
 
+  for (let i = 0; i < filterParams.length; i++) {
+    filterParams[i]["order"] = maxFilterOrder 
+  }
+
   let bandstopSet = [];
-  for (let i = 0; i < targetFrequencies.length; i++) {
-    if (targetFrequencies[i] > 5) { //Greater than 5Hz
-      bandstopSet.push(bandstopCoefficients(sampleRate, targetFrequencies[i]-2, targetFrequencies[i]+2, orderAttenParams[i][1], maxFilterOrder));
+  for (let i = 0; i < filterParams.length; i++) {
+    if (filterParams[i]["frequency"] > 5) { //Greater than 5Hz
+      bandstopSet.push(bandstopCoefficients(sampleRate, filterParams[i]["frequency"]-2, filterParams[i]["frequency"]+2, filterParams[i]["attenuation"], filterParams[i]["order"]));
     } else {
-      bandstopSet.push(bandstopCoefficients(sampleRate, 0, targetFrequencies[i]+2, orderAttenParams[i][1], maxFilterOrder));
+      bandstopSet.push(bandstopCoefficients(sampleRate, 0, filterParams[i]["frequency"]+2, filterParams[i]["attenuation"], filterParams[i]["order"]));
     }
   }
 
@@ -242,10 +234,24 @@ const noiseRemoval = (frequencies, magnitudes, sampleRate, lowerLim, upperLim, m
     let quantizedNoisyCoefficients = quantizeCoefficients(noisyCoefficients);
     //console.log("Noisy Coefficients: " + noisyCoefficients);
     //console.log("Quantized Noisy Coefficients: " + quantizedNoisyCoefficients);
+    //return quantizedNoisyCoefficients;
     return quantizedNoisyCoefficients;
   }
   return [];
-  
+}
+
+const sendCoefficients = (quantizedNoisyCoefficients) => {
+  let options = {
+    mode: "text",
+    pythonOptions: ["-u"],
+    args: ["t"].concat(quantizedNoisyCoefficients.reverse()),
+  };
+
+  PythonShell.run("ftdi.py", options, function (err, results) {
+    if (err) throw err;
+    console.log("Script finished.");
+    console.log('result: ', results.toString());
+  });
 }
 
 const generalAnalysis = (frequencies, magnitudes) => {
@@ -269,5 +275,7 @@ const GetPitchValue = (recordedData) => {
 
 module.exports = {
   GetPitchValue: GetPitchValue,
-  fftAnalysis: fftAnalysis
+  fftAnalysis: fftAnalysis,
+  coefficientGeneration: coefficientGeneration,
+  sendCoefficients: sendCoefficients
 };
