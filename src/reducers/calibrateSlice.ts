@@ -9,7 +9,7 @@ interface CalibrateState {
 }
 
 const initialState: CalibrateState = {
-  currentState: Calibrate.deviceConfig,
+  currentState: Calibrate.initalMenu,
   deviceId: null,
   testName: null,
 };
@@ -34,6 +34,19 @@ export const calibrateSlice = createSlice({
           break;
         }
         case Calibrate.audioTest1: {
+          state.currentState = Calibrate.processTest;
+          break;
+        }
+        case Calibrate.processTest: {
+          state.currentState = Calibrate.prompt2;
+          break;
+        }
+        case Calibrate.prompt2: {
+          state.currentState = Calibrate.audioTest2;
+          state.testName = "Sibilant";
+          break;
+        }
+        case Calibrate.audioTest2: {
           state.currentState = Calibrate.process;
           break;
         }
@@ -46,11 +59,17 @@ export const calibrateSlice = createSlice({
     setDeviceId: (state, action: PayloadAction<string>) => {
       state.deviceId = action.payload;
     },
+    setInitalState: (state) => {
+      state.currentState = initialState.currentState;
+      state.deviceId = initialState.deviceId;
+      state.testName = initialState.testName;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { nextState, setDeviceId } = calibrateSlice.actions;
+export const { nextState, setDeviceId, setInitalState } =
+  calibrateSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectCalibrate = (state: RootState) => state.calibrate;

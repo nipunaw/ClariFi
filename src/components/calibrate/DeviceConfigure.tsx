@@ -45,7 +45,11 @@ export default function DeviceConfigure() {
       }
     }
     return (
-      <button onClick={handleClick} disabled={isDisabled}>
+      <button
+        className="user-button"
+        onClick={handleClick}
+        disabled={isDisabled}
+      >
         {buttonDisplay}
       </button>
     );
@@ -53,7 +57,9 @@ export default function DeviceConfigure() {
 
   return (
     <div className="main-content">
-      <div className="display-message">{"Please select a recording device from below:"}</div>
+      <div className="display-message">
+        {"Please select a recording device from below:"}
+      </div>
       <AudioDeviceList selectDevice={setSelectedDevice} />
       {getButton()}
     </div>

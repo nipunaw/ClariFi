@@ -1,6 +1,9 @@
 :root {
   --lighter-color: #2e51aa;
   --darker-color: #002573;
+  --purple-color: #7e57c2;
+  --drak-gray-color: #424242;
+  --red-color: #b71c1c;
   --white-color: #fff;
   --overlay-color: #173677;
 }
@@ -47,4 +50,30 @@ code {
   display: flex;
   flex: 1 1 1px;
   min-height: 0;
+}
+
+.user-button {
+  margin-top: 20px;
+  min-height: 40px;
+  width: 100%;
+  background-color: var(--purple-color);
+  color: var(--white-color);
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  border-radius: 3px;
+  border: solid;
+  border-color: var(--purple-color);
+}
+
+.user-button:disabled {
+  background-color: var(--drak-gray-color);
+  border-color: var(--drak-gray-color);
+  opacity: 80%;
+}
+
+.text-field {
+  width: 100%;
+  margin-top: 20px;
 }

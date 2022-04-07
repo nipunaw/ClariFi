@@ -11,7 +11,7 @@
   font-size: 2rem !important;
   padding-top: 1em !important;
   padding-bottom: 1em !important;
-  background-color: var(--lighter-color) !important;
+  background-color: var(--lighter-color);
   border-color: var(--lighter-color) !important;
 }
 

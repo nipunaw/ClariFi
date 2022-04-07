@@ -1,18 +1,23 @@
-const {
-  default: installExtension,
-  REDUX_DEVTOOLS,
-} = require("electron-devtools-installer");
+const { error } = require("console");
 const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const fs = require("fs");
-const { resolve } = require("path");
+const path = require("path");
 const { electron } = require("process");
-const { GetPitchValue, fftAnalysis } = require("./main/audioProcess");
+const { fftAnalysis, coefficientGeneration, sendCoefficients } = require("./main/audioProcess");
+
+var installExtension;
+var REDUX_DEVTOOLS;
+if (process.env.LOCAL) {
+  installExtension = require("electron-devtools-installer").default;
+  REDUX_DEVTOOLS = require("electron-devtools-installer").REDUX_DEVTOOLS;
+}
 
 function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
     width: 1000,
     height: 800,
+    icon: __dirname + "/favicon.ico",
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -21,7 +26,11 @@ function createWindow() {
   });
 
   // Load the index.html from a url
-  win.loadURL("http://localhost:3000");
+  let loadURL = `file://${path.join(__dirname, "../build/index.html")}`;
+  if (process.env.LOCAL) {
+    loadURL = `http://localhost:3000`;
+  }
+  win.loadURL(loadURL);
 
   // Open the DevTools.
   //win.webContents.openDevTools();
@@ -63,17 +72,25 @@ function createWindow() {
     }
   );
 
-  ipcMain.on("process-audio", (event, rawRecordedData, sampleRate, fftData) => {
+  ipcMain.on("process-audio", (event, rawRecordedData, sampleRate, test_type) => {
     try {
       //Pitch method is deprecated
       //const pitch = GetPitchValue(rawRecordedData);
-      const noiseTaps = fftAnalysis(rawRecordedData, sampleRate, fftData);
+      values = 0;
+      if (test_type == "Ambient Noise" || test_type == "Sibilant") {
+        values = fftAnalysis(rawRecordedData, sampleRate, test_type);
+      } else if (test_type == "coefficients") {
+        console.log(rawRecordedData)
+        values = coefficientGeneration(rawRecordedData, sampleRate);
+      } else if (test_type == "profile_deploy") {
+        sendCoefficients(values);
+      }
 
       win.webContents.send(
         "audio-finished",
         true,
         `No errors occured while processing!`,
-        noiseTaps
+        values
       );
     } catch (e) {
       console.log(e);
@@ -103,10 +120,17 @@ function readFile(filepath, mimeType) {
 }
 
 app.whenReady().then(() => {
-  installExtension(REDUX_DEVTOOLS)
-    .then((name) => console.log(`Added Extension:  ${name}`))
-    .catch((err) => console.log("An error occurred: ", err));
-  createWindow();
+  if (process.env.LOCAL) {
+    installExtension(REDUX_DEVTOOLS)
+      .then((name) => console.log(`Added Extension:  ${name}`))
+      .catch((err) => console.log("An error occurred: ", err));
+  }
+
+  try {
+    createWindow();
+  } catch {
+    app.quit();
+  }
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

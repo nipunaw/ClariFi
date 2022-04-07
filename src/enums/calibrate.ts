@@ -3,7 +3,8 @@ export enum Calibrate {
   deviceConfig,
   prompt1,
   audioTest1,
-  //prompt2,
-  //audioTest2,
+  processTest,
+  prompt2,
+  audioTest2,
   process,
 }
