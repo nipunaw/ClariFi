@@ -6,7 +6,7 @@ const persistedState = localStorageState ? JSON.parse(localStorageState) : {};
 
 const store = configureStore({
   reducer: rootReducer,
-  preloadedState: persistedState,
+  //preloadedState: persistedState,
 });
 
 store.subscribe(() => {
