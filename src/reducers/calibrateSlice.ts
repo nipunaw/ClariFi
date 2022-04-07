@@ -9,7 +9,7 @@ interface CalibrateState {
 }
 
 const initialState: CalibrateState = {
-  currentState: Calibrate.deviceConfig,
+  currentState: Calibrate.initalMenu,
   deviceId: null,
   testName: null,
 };

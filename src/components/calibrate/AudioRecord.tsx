@@ -166,7 +166,11 @@ export default function AudioRecord() {
       }
     }
     return (
-      <button onClick={handleClick} disabled={isDisabled}>
+      <button
+        className="user-button"
+        onClick={handleClick}
+        disabled={isDisabled}
+      >
         {buttonDisplay}
       </button>
     );

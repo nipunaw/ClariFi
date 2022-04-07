@@ -8,6 +8,7 @@ import { Calibrate } from "enums/calibrate";
 import Process from "./calibrate/Process";
 import SibilantInfoPrompt from "./calibrate/SibilantInfoPrompt";
 import ProcessTest from "./calibrate/ProcessTest";
+import InitalPrompt from "./calibrate/InitalPrompt";
 
 export default function CalibrateContainer() {
   const { currentState: calibrateState } = useAppSelector(selectCalibrate);
@@ -15,7 +16,7 @@ export default function CalibrateContainer() {
   const getContent = (): JSX.Element | null => {
     switch (calibrateState) {
       case Calibrate.initalMenu:
-        return null;
+        return <InitalPrompt />;
       case Calibrate.deviceConfig:
         return <DeviceConfigure />;
       case Calibrate.prompt1:

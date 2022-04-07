@@ -20,7 +20,9 @@ const SibilantInfoPrompt: React.FC<{}> = () => {
         selected device and begin recording, which will last 5-6 seconds. Please
         sound out the letter "s" at a consistent pitch while recording.
       </div>
-      <button onClick={() => dispatch(nextState())}> Proceed</button>
+      <button className="user-button" onClick={() => dispatch(nextState())}>
+        Proceed
+      </button>
     </div>
   );
 };

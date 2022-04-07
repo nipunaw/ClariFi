@@ -2,27 +2,27 @@ import "css/MainContent.css";
 import { useAppDispatch } from "hooks";
 import { nextState } from "reducers/calibrateSlice";
 
-const ProcessTest: React.FC<{}> = () => {
+const InitalPrompt: React.FC<{}> = () => {
   const dispatch = useAppDispatch();
 
   return (
     <div className="main-content" style={{ wordBreak: "break-word" }}>
-      <div className="display-message">ClariFi Filters</div>
+      <div className="display-message">Getting Started</div>
       <div
         style={{
           marginTop: "15px",
           marginBottom: "20px",
         }}
       >
-        If the ClariFi device is connected, the calculated filter taps have been
-        transmitted via SPI to the FPGA. Please proceed with the next test.
+        To proceed with using this calibration process, you must have the
+        ClariFi device connected. If it is not connected, you will be unable to
+        proceed with the test.
       </div>
       <button className="user-button" onClick={() => dispatch(nextState())}>
-        {" "}
         Proceed
       </button>
     </div>
   );
 };
 
-export default ProcessTest;
+export default InitalPrompt;
