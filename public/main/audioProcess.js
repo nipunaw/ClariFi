@@ -60,7 +60,7 @@ const firFilterParams = (frequencies, magnitudes, sampleRate, test_type) => {
   let upperLim = sampleRate/2
   let mpd = 0
   
-  if (test_type == "ambience") {
+  if (test_type == "Ambient Noise") {
     upperLim = 150
     mpd = 500
   } else {
@@ -192,7 +192,7 @@ const quantizeCoefficients = (filterCoefficients) => {
 
 const noiseRemoval = (frequencies, magnitudes, sampleRate, lowerLim, upperLim, mpd) => {
   const peaksWatanabeIndices = identifyPeaks(magnitudes, mpd);
-  let targetFreqMags = {}
+  let targetFreqMags = []
   for (let i = 0; i < peaksWatanabeIndices.length; i++) {
     if (frequencies[peaksWatanabeIndices[i]] < upperLim && lowerLim < frequencies[peaksWatanabeIndices[i]]  ) {
       targetFreqMags.push([{"frequency": Math.round(frequencies[peaksWatanabeIndices[i]]), "magnitude": Math.round(magnitudes[peaksWatanabeIndices[i]])}])
@@ -201,7 +201,7 @@ const noiseRemoval = (frequencies, magnitudes, sampleRate, lowerLim, upperLim, m
   return targetFreqMags;
 }
 
-const coefficientGeneration = (targetFreqMags) => {
+const coefficientGeneration = (targetFreqMags, sampleRate) => {
   let filterParams = []
   let maxFilterOrder = Number.MIN_VALUE; // Max filter order (min required for good results)
   for (let i = 0; i < targetFreqMags.length; i++) {
@@ -226,7 +226,7 @@ const coefficientGeneration = (targetFreqMags) => {
     }
   }
 
-  console.log("Noisy lower frequencies: " + targetFrequencies);
+  console.log("Noisy lower frequencies: " + targetFreqMags);
   if (bandstopSet.length > 0) {
     // Safely assume independence of bands
     var sum = (r, a) => r.map((b, i) => a[i] + b);

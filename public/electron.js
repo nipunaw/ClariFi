@@ -76,11 +76,12 @@ function createWindow() {
     try {
       //Pitch method is deprecated
       //const pitch = GetPitchValue(rawRecordedData);
-      values;
-      if (test_type == "ambience" || test_type == "sibilance") {
+      values = 0;
+      if (test_type == "Ambient Noise" || test_type == "Sibilant") {
         values = fftAnalysis(rawRecordedData, sampleRate, test_type);
       } else if (test_type == "coefficients") {
-        values = coefficientGeneration(targetFreqMags);
+        console.log(rawRecordedData)
+        values = coefficientGeneration(rawRecordedData, sampleRate);
       } else if (test_type == "profile_deploy") {
         sendCoefficients(values);
       }

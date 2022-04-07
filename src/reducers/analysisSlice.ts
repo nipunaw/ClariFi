@@ -5,12 +5,14 @@ interface AnalysisState {
   ambientData: any;
   sibilantData: any;
   coefficientData: any;
+  samplingRate: any;
 }
 
 const initialState: AnalysisState = {
   ambientData: null,
   sibilantData: null,
   coefficientData: null,
+  samplingRate: null
 };
 
 export const analysisSlice = createSlice({
@@ -21,10 +23,13 @@ export const analysisSlice = createSlice({
       state,
       action: PayloadAction<{ name: string; data: any }>
     ) => {
-      if (action.payload.name == "ambient") {
+      if (action.payload.name == "Ambient Noise" && state.ambientData == null) {
         state.ambientData = action.payload.data;
-      } else if (action.payload.name == "sibilant") {
+      } else if (action.payload.name == "Sibilant") {
         state.sibilantData = action.payload.data;
+      }
+      else if (action.payload.name == "Sampling Rate") {
+        state.samplingRate = action.payload.data;
       }
     },
   },

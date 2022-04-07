@@ -14,9 +14,8 @@ const InitalPrompt: React.FC<{}> = () => {
           marginBottom: "20px",
         }}
       >
-        To proceed with using this calibration process, you must have the
-        ClariFi device connected. If it is not connected, you will be unable to
-        proceed with the test.
+        To proceed with using this calibration process, you must have a recording device connected. If one is not connected, you will be unable to
+        proceed pass the device selection screen.
       </div>
       <button className="user-button" onClick={() => dispatch(nextState())}>
         Proceed

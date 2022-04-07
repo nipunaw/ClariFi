@@ -47,27 +47,7 @@ const handleStop = (setRecorderState: () => void, updateState: () => void) => {
   updateState();
 };
 
-const handleDataAvailable = (event: BlobEvent) => {
-  let audioCtx = new AudioContext();
-  event.data.arrayBuffer().then((arrayBuf) => {
-    audioCtx.decodeAudioData(arrayBuf).then((buffer) => {
-      //sample rate is 48kHz for my device
 
-      //let bufferLength = analyser.frequencyBinCount;
-      //const fftData = new Float32Array(bufferLength);
-      //analyser.getFloatFrequencyData(fftData);
-
-      const rawRecordedData = buffer.getChannelData(0); // get a single channel of sound
-      const sampleRate = audioCtx.sampleRate;
-      electron.ipcRenderer.send(
-        "process-audio",
-        rawRecordedData,
-        sampleRate,
-        "ambience"
-      );
-    });
-  });
-};
 
 export default function AudioRecord() {
   const [state, setState] = useState<AudioState>(AudioState.Ready);
@@ -95,6 +75,32 @@ export default function AudioRecord() {
       }
     );
   }, []);
+
+  const handleDataAvailable = (event: BlobEvent) => {
+    let audioCtx = new AudioContext();
+    event.data.arrayBuffer().then((arrayBuf) => {
+      audioCtx.decodeAudioData(arrayBuf).then((buffer) => {
+        //sample rate is 48kHz for my device
+  
+        //let bufferLength = analyser.frequencyBinCount;
+        //const fftData = new Float32Array(bufferLength);
+        //analyser.getFloatFrequencyData(fftData);
+  
+        const testString = testName !== null ? testName : "";
+        const rawRecordedData = buffer.getChannelData(0); // get a single channel of sound
+        const sampleRate = audioCtx.sampleRate;
+
+        dispatch(storeTestData({ name: "Sampling Rate", data: sampleRate }));
+
+        electron.ipcRenderer.send(
+          "process-audio",
+          rawRecordedData,
+          sampleRate,
+          testString
+        );
+      });
+    });
+  };
 
   function handleSuccess(stream: MediaStream) {
     source = audioCtx.createMediaStreamSource(stream);
