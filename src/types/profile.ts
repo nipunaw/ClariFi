@@ -1,5 +1,5 @@
 export interface Profile {
-  id: Number;
+  id: number;
   name: String;
-  values: Number[];
+  values: number[];
 }

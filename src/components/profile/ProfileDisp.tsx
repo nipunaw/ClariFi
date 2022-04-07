@@ -1,17 +1,36 @@
 import "css/MainContent.css";
 import { useAppDispatch, useAppSelector } from "hooks";
-import { selectAllProfiles } from "reducers/profileSlice";
-import { nextState } from "reducers/calibrateSlice";
+import {
+  selectAllProfiles,
+  selectSelectedProfileId,
+} from "reducers/profileSlice";
 import PorfileObject from "./ProfileObject";
 
 const ProfileDisp: React.FC<{}> = () => {
   const dispatch = useAppDispatch();
   const profiles = useAppSelector(selectAllProfiles);
+  const selectedProfile = useAppSelector(selectSelectedProfileId);
 
   const getProfiles = (): JSX.Element[] => {
     return profiles.map((profile, index: number) => {
-      return <PorfileObject profile={profile} />;
+      return (
+        <PorfileObject
+          key={index}
+          isSelected={selectedProfile == profile.id}
+          profile={profile}
+        />
+      );
     });
+  };
+
+  const getContextMenu = () => {
+    const contextMenu = "here";
+
+    return (
+      <div className="context-menu">
+        {selectedProfile !== null ? contextMenu : null}
+      </div>
+    );
   };
 
   return (
@@ -23,6 +42,7 @@ const ProfileDisp: React.FC<{}> = () => {
           marginBottom: "20px",
         }}
       >
+        {getContextMenu()}
         {getProfiles()}
       </div>
     </div>

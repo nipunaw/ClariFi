@@ -4,6 +4,8 @@ import {
   profileState,
   selectAppState,
 } from "reducers/appSlice";
+import { setInitalState as calibrateInital } from "reducers/calibrateSlice";
+import { setInitalState as profileInital } from "reducers/profileSlice";
 import { useAppDispatch, useAppSelector } from "hooks";
 import "../css/SideBar.css";
 import { ApplicationState } from "enums/app";
@@ -13,6 +15,7 @@ interface MenuButton {
   menuEnum: ApplicationState;
   state: "active" | "disabled";
   dispatchAction: any;
+  initalState: any;
 }
 
 const menuChoices: MenuButton[] = [
@@ -21,12 +24,14 @@ const menuChoices: MenuButton[] = [
     menuEnum: ApplicationState.Calibrate,
     state: "active",
     dispatchAction: calibrateState(),
+    initalState: calibrateInital(),
   },
   {
     displayName: "Profiles",
     menuEnum: ApplicationState.Profile,
     state: "active",
     dispatchAction: profileState(),
+    initalState: profileInital(),
   },
 ];
 
@@ -43,7 +48,10 @@ function SideBar() {
       className="side-button"
       variant="primary"
       disabled={item.state === "disabled"}
-      onClick={() => dispatch(item.dispatchAction)}
+      onClick={() => {
+        dispatch(item.dispatchAction);
+        dispatch(item.initalState);
+      }}
     >
       {item.displayName}
     </Button>

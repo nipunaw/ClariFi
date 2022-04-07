@@ -1,14 +1,23 @@
 import { Profile } from "types/profile";
 import "css/Profile.css";
+import { useAppDispatch } from "hooks";
+import { setSelectedProfile } from "reducers/profileSlice";
 
 const PorfileObject: React.FC<{
   profile: Profile;
-}> = ({ profile }) => {
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    console.log("profile clicked");
-  };
+  isSelected: boolean;
+}> = ({ profile, isSelected }) => {
+  const classStyle = isSelected
+    ? "profile-button profile-button-selected"
+    : "profile-button";
+
+  const dispatch = useAppDispatch();
+
   return (
-    <div className="profile-button" onClick={handleClick}>
+    <div
+      className={classStyle}
+      onClick={() => dispatch(setSelectedProfile(profile.id))}
+    >
       {profile.name}
     </div>
   );

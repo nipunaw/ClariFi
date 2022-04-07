@@ -12,3 +12,15 @@
   font-weight: 500;
   border-radius: 8px;
 }
+
+.profile-button-selected {
+  background-color: var(--purple-color);
+  border-color: var(--purple-color);
+  color: var(--white-color);
+  font-weight: 600;
+}
+
+.context-menu {
+  min-height: 50px;
+  display: flex;
+}
