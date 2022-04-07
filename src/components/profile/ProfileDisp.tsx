@@ -1,6 +1,7 @@
 import "css/MainContent.css";
 import { useAppDispatch, useAppSelector } from "hooks";
 import {
+  deleteProfile,
   selectAllProfiles,
   selectSelectedProfileId,
 } from "reducers/profileSlice";
@@ -24,7 +25,27 @@ const ProfileDisp: React.FC<{}> = () => {
   };
 
   const getContextMenu = () => {
-    const contextMenu = "here";
+    const contextMenu = (
+      <>
+        <button
+          className="context-button"
+          // Here is where you deploy to device
+          //onClick={() => dispatch(setInitalState())}
+        >
+          Load on Device
+        </button>
+        <button
+          className="context-button"
+          onClick={
+            selectedProfile !== null
+              ? () => dispatch(deleteProfile(selectedProfile))
+              : () => {}
+          }
+        >
+          Delete
+        </button>
+      </>
+    );
 
     return (
       <div className="context-menu">

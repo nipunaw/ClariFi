@@ -21,6 +21,28 @@
 }
 
 .context-menu {
-  min-height: 50px;
+  min-height: 80px;
   display: flex;
+  justify-content: space-between;
+  align-content: center;
+}
+
+.context-button {
+  text-align: center;
+  max-height: 50px;
+  width: 100%;
+  background-color: var(--drak-gray-color);
+  color: var(--white-color);
+  margin-bottom: 30px;
+  margin-right: 10px;
+  padding: 5px 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 2px;
+  border-color: var(--drak-gray-color);
+  border-style: solid;
+}
+
+.context-button:last-child {
+  margin-right: 0px;
 }

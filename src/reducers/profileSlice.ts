@@ -35,6 +35,21 @@ export const profileSlice = createSlice({
       state.savedProfiles.push(createdProfile);
       state.nextProfileId = state.nextProfileId + 1;
     },
+    deleteProfile: (state, action: PayloadAction<number>) => {
+      if (state.currentProfileId === action.payload) {
+        state.currentProfileId = null;
+      }
+
+      if (state.selectedProfile === action.payload) {
+        state.selectedProfile = null;
+      }
+
+      state.savedProfiles = state.savedProfiles.filter(function (
+        profile: Profile
+      ) {
+        return profile.id !== action.payload;
+      });
+    },
     setInitalState: (state) => {
       state.selectedProfile = initialState.selectedProfile;
     },
@@ -45,8 +60,13 @@ export const profileSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setProfile, createProfile, setInitalState, setSelectedProfile } =
-  profileSlice.actions;
+export const {
+  setProfile,
+  createProfile,
+  setInitalState,
+  setSelectedProfile,
+  deleteProfile,
+} = profileSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectProfileId = (state: RootState) =>
